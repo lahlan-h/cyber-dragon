@@ -1,0 +1,31 @@
+{
+  "name": "cyber-dragon",
+  "version": "0.0.0",
+  "description": "A Raspberry Pi-based project for interfacing with PLCs and exploring industrial automation.",
+  "private": true,
+  "author": "lahlan-h",
+  "type": "module",
+  "packageManager": "npm@11.16.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lahlan-h/cyber-dragon.git"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.2"
+  },
+  "dependencies": {
+    "node": "^26.3.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "fsevents@2.3.3": true,
+    "node@26.10.0": true
+  }
+}
