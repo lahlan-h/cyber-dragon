@@ -1,14 +1,10 @@
 import React from "react";
 import { Text, Box } from "ink";
 
-import { useTheme, useStyles } from "@/hooks/useTheme";
-import { useNavigation } from "@/hooks/useNavigation";
+import { useStyles } from "@/hooks/useTheme";
 
 function Footer() {
   const styles = useStyles("component");
-
-  // temporary ...
-  const { screen } = useNavigation();
 
   return (
     <Box {...styles.footer}>
@@ -16,10 +12,10 @@ function Footer() {
         <Text {...styles.footerText}>↑/↓ navigate • enter select • esc menu</Text>
       </Box>
       <Box {...styles.footerCenter}>
-        <Text {...styles.footerText}>{screen}</Text>
+        <Text {...styles.footerText}></Text>
       </Box>
       <Box {...styles.footerRight}>
-        <Text {...styles.footerText}>{}</Text>
+        <Text {...styles.footerText}></Text>
       </Box>
     </Box>
   );
