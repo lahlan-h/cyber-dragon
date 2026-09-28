@@ -5,7 +5,7 @@ import Menu from "@/components/Menu";
 import { usePi } from "@/hooks/usePi";
 
 const THEME = "DarkGray";
-const MENU_ITEMS = ["Flash", "Restore", "Upload", "Exit"];
+const MENU_ITEMS = ["Flash", "Restore", "Upload", "Reconnect", "Exit"];
 const CONTROLS = "↑/↓ navigate • enter select • esc quit";
 
 const App = () => {

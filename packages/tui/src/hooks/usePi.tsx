@@ -34,8 +34,8 @@ export const PiProvider = ({ url, children }: PiProps) => {
   return <PiContext.Provider value={{ status, plc, send }}>{children}</PiContext.Provider>;
 };
 
-export function usePi() {
+export const usePi = () => {
   const context = useContext(PiContext);
   if (!context) throw new Error("usePi must be used inside <PiProvider>");
   return context;
-}
+};
