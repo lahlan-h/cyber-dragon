@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Text, Box, useInput } from "ink";
 
-import { useStyles } from "@/hooks/useTheme";
+import { useStyles, useTheme } from "@/hooks/useTheme";
 import { useNavigation, type Screen } from "@/hooks/useNavigation";
+import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 export interface MenuItem {
   label: string;
@@ -17,12 +18,16 @@ interface MenuProps {
 
 const Menu = ({ items, isActive }: MenuProps) => {
   const styles = useStyles("component");
+  const { colors } = useTheme();
+
   const { screen } = useNavigation();
-  const [selectedIndex, setSelectedIndex] = useState(0); // only Menu needs this, so it lives here
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const { focus } = usePaneFocus();
+  const isFocused = focus === "menu";
 
   useInput(
     (input, key) => {
-      // "+ items.length" stops -1 at the top: in JS, -1 % 4 is -1, not 3
       if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
       if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
       if (key.return) items[selectedIndex].onSelect();
@@ -31,7 +36,7 @@ const Menu = ({ items, isActive }: MenuProps) => {
   );
 
   return (
-    <Box {...styles.menu}>
+    <Box {...styles.menu} borderColor={isFocused ? colors.accent : colors.border}>
       {items.map((item, index) => {
         const isCursor = isActive && index === selectedIndex; // cursor only shows while the menu has the keyboard
         const isOpen = item.screen === screen; // the screen currently on display
