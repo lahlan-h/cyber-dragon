@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", // modern JS that Node 22+ runs natively
+    "module": "ESNext", // use import/export
+    "moduleResolution": "bundler", // resolve imports the way tsx does (no extensions needed)
+    "jsx": "react-jsx", // JSX without importing React
+
+    "strict": true, // full type checking
+    "skipLibCheck": true, // don't type-check node_modules
+    "isolatedModules": true, // flag code tsx can't compile one file at a time
+    "esModuleInterop": true, // allows `import React from "react"`
+    "allowImportingTsExtensions": true,
+
+    // tsx runs your code directly, so TypeScript only checks types
+    "noEmit": true,
+
+    // "@/hooks/usePi" -> "./src/hooks/usePi"
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

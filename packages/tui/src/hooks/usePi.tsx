@@ -13,7 +13,7 @@ interface PiProps {
 
 const PiContext = createContext<PiContextType | null>(null);
 
-export function PiProvider({ url, children }: PiProps) {
+export const PiProvider = ({ url, children }: PiProps) => {
   const [status, setStatus] = useState("connecting");
   const [plc, setPlc] = useState(null);
   const ws = useRef<WebSocket | null>(null);
@@ -32,7 +32,7 @@ export function PiProvider({ url, children }: PiProps) {
   };
 
   return <PiContext.Provider value={{ status, plc, send }}>{children}</PiContext.Provider>;
-}
+};
 
 export function usePi() {
   const context = useContext(PiContext);

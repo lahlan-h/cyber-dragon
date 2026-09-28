@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, Box, useInput, useApp } from "ink";
+import { usePi } from "../hooks/usePi";
 
 interface MenuProps {
   theme: string;
@@ -13,11 +14,13 @@ interface MenuProps {
 
 const Menu = ({ theme, menuWidth, items, selectedIndex, setSelectedIndex, isActive }: MenuProps) => {
   const { exit } = useApp(); // Provides direct access to the command-line application (i.e., input)
+  const { send } = usePi();
 
   useInput(
     (input, key) => {
       if (key.upArrow) setSelectedIndex((selectedIndex - 1 + items.length) % items.length);
       if (key.downArrow) setSelectedIndex((selectedIndex + 1 + items.length) % items.length);
+      if (key.return) send("hello world!");
       if (key.escape) exit();
     },
     { isActive },
