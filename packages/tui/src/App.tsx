@@ -3,8 +3,7 @@ import { Box, useWindowSize, useApp, useInput } from "ink";
 
 // Custom Hooks
 import { useNavigation, type Screen } from "@/hooks/useNavigation";
-import { useTheme } from "@/hooks/useTheme";
-import { usePi } from "@/hooks/usePi";
+import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 // Custom Components / Styles / Helpers
 import Menu, { type MenuItem } from "@/components/Menu";
@@ -17,7 +16,7 @@ const App = () => {
   const { columns, rows } = useWindowSize();
   const { navigate } = useNavigation();
   const { exit } = useApp();
-  const [focus, setFocus] = useState<"menu" | "content">("menu");
+  const { focus, setFocus } = usePaneFocus();
 
   const open = (screen: Screen) => {
     navigate(screen);

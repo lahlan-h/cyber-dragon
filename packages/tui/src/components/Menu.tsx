@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Text, Box, useInput } from "ink";
 
-import { useStyles } from "@/hooks/useTheme";
+import { useStyles, useTheme } from "@/hooks/useTheme";
+import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 // Other components will have to shape their menus to this
 export interface MenuItem {
@@ -19,6 +20,10 @@ const Menu = ({ items, isActive, menuWidth }: MenuProps) => {
   const styles = useStyles("component");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const { colors } = useTheme();
+  const { focus } = usePaneFocus();
+  const isFocused = focus === "menu";
+
   useInput(
     (input, key) => {
       if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
@@ -29,7 +34,7 @@ const Menu = ({ items, isActive, menuWidth }: MenuProps) => {
   );
 
   return (
-    <Box {...styles.menu}>
+    <Box {...styles.menu} borderColor={isFocused ? colors.accent : colors.border}>
       {items.map((item, index) => {
         const isSelected = index === selectedIndex;
 

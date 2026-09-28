@@ -11,6 +11,7 @@ import Exit from "@/screens/Exit";
 // Hooks
 import { type Screen, useNavigation } from "@/hooks/useNavigation";
 import { useTheme, useStyles } from "@/hooks/useTheme";
+import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 const screens: Record<Screen, ComponentType> = {
   home: Home,
@@ -24,10 +25,14 @@ const Content = () => {
   const styles = useStyles("component");
   const { screen } = useNavigation();
 
+  const { colors } = useTheme();
+  const { focus } = usePaneFocus();
+  const isFocused = focus === "content";
+
   const Current = screens[screen];
 
   return (
-    <Box {...styles.componentContainer}>
+    <Box {...styles.componentContainer} borderColor={isFocused ? colors.accent : colors.border}>
       <Current />
     </Box>
   );
