@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 interface PiContextType {
-  status: string;
+  status: PiConnectionType;
   plc: any;
   send: (msg: string) => void;
 }
@@ -11,10 +11,12 @@ interface PiProps {
   children: ReactNode;
 }
 
+export type PiConnectionType = "disconnected" | "connecting" | "connected";
+
 const PiContext = createContext<PiContextType | null>(null);
 
 export const PiProvider = ({ url, children }: PiProps) => {
-  const [status, setStatus] = useState("connecting");
+  const [status, setStatus] = useState<PiConnectionType>("connecting");
   const [plc, setPlc] = useState(null);
   const ws = useRef<WebSocket | null>(null);
 

@@ -10,6 +10,7 @@
     "isolatedModules": true, // flag code tsx can't compile one file at a time
     "esModuleInterop": true, // allows `import React from "react"`
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
 
     // tsx runs your code directly, so TypeScript only checks types
     "noEmit": true,

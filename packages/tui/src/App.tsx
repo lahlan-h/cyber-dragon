@@ -2,16 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Text, Box, useWindowSize } from "ink";
 
 // Custom Hooks
-import { usePi } from "@/hooks/usePi";
 import { useNavigation } from "@/hooks/useNavigation";
 import { useTheme } from "@/hooks/useTheme";
+import { usePi } from "@/hooks/usePi";
 
-// Custom Components / Styles
-import Menu from "@/components/Menu";
+// Custom Components / Styles / Helpers
 import { createHomeStyles } from "@/screens/home.styles";
+import Header from "@/components/Header";
+import Menu from "@/components/Menu";
+import { VERSION } from "@/version";
 
 const THEME = "DarkGray";
-const MENU_ITEMS = ["Flash", "Restore", "Upload", "Reconnect", "Exit"];
+const MENU_ITEMS = ["Flash", "Restore", "Reconnect", "Exit"];
 const CONTROLS = "↑/↓ navigate • enter select • esc quit";
 
 // The Plan  ->
@@ -21,7 +23,6 @@ const CONTROLS = "↑/↓ navigate • enter select • esc quit";
 const App = () => {
   const { columns, rows } = useWindowSize(); // Deprecated but keep incase ig
 
-  const { status } = usePi();
   const { colors } = useTheme();
   const { screen, navigate, back } = useNavigation();
   const homeStyles = createHomeStyles(colors);
@@ -31,7 +32,7 @@ const App = () => {
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
-      <Text>cyber-dragon status: {status}</Text>
+      <Header title="cyber-dragon" version={VERSION} />
       <Menu
         theme={THEME}
         items={MENU_ITEMS}

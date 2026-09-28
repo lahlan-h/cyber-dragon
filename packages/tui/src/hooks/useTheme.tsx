@@ -1,6 +1,7 @@
 import React, { createContext, type ReactNode, useContext, useState } from "react";
 
 import { createHomeStyles } from "@/screens/home.styles";
+import { createComponentStyles } from "@/screens/component.styles";
 
 // Due to dark and light mode being handled by ink / the native terminal, instead
 // of light and dark mode we can have varying themes for the application.
@@ -60,6 +61,7 @@ const isThemeName = (value: string): value is ThemeName => Object.hasOwn(themes,
 // 3. Then register it here.
 const styleMap = {
   home: createHomeStyles,
+  component: createComponentStyles,
 } as const;
 
 // Helper types for stylesheets
