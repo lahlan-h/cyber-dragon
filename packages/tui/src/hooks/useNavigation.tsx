@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, type ReactNode } from "react";
 
-type Screen = "home" | "settings";
+type Screen = "home" | "flash" | "restore" | "upload" | "reconnect" | "exit";
 
 interface NavigationContextType {
   screen: Screen;

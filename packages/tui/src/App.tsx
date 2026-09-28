@@ -8,6 +8,10 @@ const THEME = "DarkGray";
 const MENU_ITEMS = ["Flash", "Restore", "Upload", "Reconnect", "Exit"];
 const CONTROLS = "↑/↓ navigate • enter select • esc quit";
 
+// The Plan  ->
+// 1. We know what screens we want to upload and we know we have our nav hook
+// 2. We always keep the Menu component loaded but have the <Screen> = "home" | "flash" | etc
+
 const App = () => {
   const { columns, rows } = useWindowSize();
   const { status } = usePi();
