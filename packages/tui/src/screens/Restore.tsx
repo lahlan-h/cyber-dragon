@@ -1,12 +1,12 @@
 import React from "react";
 import { Text, Box } from "ink";
 
-const Home = () => {
+const Restore = () => {
   return (
     <Box>
-      <Text>Home</Text>
+      <Text>Restore</Text>
     </Box>
   );
 };
 
-export default Home;
+export default Restore;

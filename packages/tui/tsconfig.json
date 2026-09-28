@@ -11,6 +11,7 @@
     "esModuleInterop": true, // allows `import React from "react"`
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
+    "types": ["node"],
 
     // tsx runs your code directly, so TypeScript only checks types
     "noEmit": true,

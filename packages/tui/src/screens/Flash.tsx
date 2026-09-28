@@ -1,12 +1,12 @@
 import React from "react";
 import { Text, Box } from "ink";
 
-const Home = () => {
+const Flash = () => {
   return (
     <Box>
-      <Text>Home</Text>
+      <Text>Flash</Text>
     </Box>
   );
 };
 
-export default Home;
+export default Flash;

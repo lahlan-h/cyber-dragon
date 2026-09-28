@@ -1,12 +1,12 @@
 import React from "react";
 import { Text, Box } from "ink";
 
-const Home = () => {
+const Settings = () => {
   return (
     <Box>
-      <Text>Home</Text>
+      <Text>Settings</Text>
     </Box>
   );
 };
 
-export default Home;
+export default Settings;

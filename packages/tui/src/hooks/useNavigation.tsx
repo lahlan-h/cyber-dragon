@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, type ReactNode } from "react";
 
-type Screen = "home" | "flash" | "restore" | "upload" | "reconnect" | "exit";
+export type Screen = "home" | "flash" | "restore" | "settings" | "exit";
 
 interface NavigationContextType {
   screen: Screen;

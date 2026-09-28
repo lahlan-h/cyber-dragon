@@ -1,45 +1,51 @@
 import React, { useState, useEffect } from "react";
-import { Text, Box, useWindowSize } from "ink";
+import { Box, useWindowSize, useApp, useInput } from "ink";
 
 // Custom Hooks
-import { useNavigation } from "@/hooks/useNavigation";
+import { useNavigation, type Screen } from "@/hooks/useNavigation";
 import { useTheme } from "@/hooks/useTheme";
 import { usePi } from "@/hooks/usePi";
 
 // Custom Components / Styles / Helpers
-import { createHomeStyles } from "@/screens/home.styles";
+import Menu, { type MenuItem } from "@/components/Menu";
+import Content from "@/components/Content";
 import Header from "@/components/Header";
-import Menu from "@/components/Menu";
+import Footer from "@/components/Footer";
 import { VERSION } from "@/version";
 
-const THEME = "DarkGray";
-const MENU_ITEMS = ["Flash", "Restore", "Reconnect", "Exit"];
-const CONTROLS = "↑/↓ navigate • enter select • esc quit";
-
-// The Plan  ->
-// 1. We know what screens we want to upload and we know we have our nav hook
-// 2. We always keep the Menu component loaded but have the <Screen> = "home" | "flash" | etc
-
 const App = () => {
-  const { columns, rows } = useWindowSize(); // Deprecated but keep incase ig
+  const { columns, rows } = useWindowSize();
+  const { navigate } = useNavigation();
+  const { exit } = useApp();
+  const [focus, setFocus] = useState<"menu" | "content">("menu");
 
-  const { colors } = useTheme();
-  const { screen, navigate, back } = useNavigation();
-  const homeStyles = createHomeStyles(colors);
+  const open = (screen: Screen) => {
+    navigate(screen);
+    setFocus("content");
+  };
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [focus, setFocus] = useState("main-menu");
+  const menuItems: MenuItem[] = [
+    { label: "Home", onSelect: () => open("home") },
+    { label: "Flash", onSelect: () => open("flash") },
+    { label: "Restore", onSelect: () => open("restore") },
+    { label: "Settings", onSelect: () => open("settings") },
+    { label: "Exit", onSelect: exit },
+  ];
+
+  // Esc hands keyboard back to the menu
+  useInput((input, key) => {
+    if (key.escape) setFocus("menu");
+  });
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
       <Header title="cyber-dragon" version={VERSION} />
-      <Menu
-        theme={THEME}
-        items={MENU_ITEMS}
-        selectedIndex={selectedIndex}
-        setSelectedIndex={setSelectedIndex}
-        isActive={focus === "main-menu"}
-      />
+      <Box flexDirection="row" flexGrow={1}>
+        <Menu items={menuItems} isActive={focus === "menu"} />
+        <Content />
+      </Box>
+
+      <Footer />
     </Box>
   );
 };

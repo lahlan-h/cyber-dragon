@@ -1,39 +1,49 @@
-import React from "react";
-import { Text, Box, useInput, useApp } from "ink";
-import { usePi } from "../hooks/usePi";
+import React, { useState } from "react";
+import { Text, Box, useInput } from "ink";
 
-interface MenuProps {
-  theme: string;
-  menuWidth?: number;
-  items: string[];
-  selectedIndex: number;
-  setSelectedIndex: (index: number) => void;
-  isActive: boolean;
-  onSelect?: () => void;
+import { useStyles } from "@/hooks/useTheme";
+
+// Other components will have to shape their menus to this
+export interface MenuItem {
+  label: string;
+  onSelect: () => void;
 }
 
-const Menu = ({ theme, menuWidth, items, selectedIndex, setSelectedIndex, isActive }: MenuProps) => {
-  const { exit } = useApp(); // Provides direct access to the command-line application (i.e., input)
-  const { send } = usePi();
+interface MenuProps {
+  items: MenuItem[];
+  isActive: boolean;
+  menuWidth?: number;
+}
+
+const Menu = ({ items, isActive, menuWidth }: MenuProps) => {
+  const styles = useStyles("component");
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useInput(
     (input, key) => {
-      if (key.upArrow) setSelectedIndex((selectedIndex - 1 + items.length) % items.length);
-      if (key.downArrow) setSelectedIndex((selectedIndex + 1 + items.length) % items.length);
-      if (key.return) send("hello world!");
-      if (key.escape) exit();
+      if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
+      if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
+      if (key.return) items[selectedIndex].onSelect();
     },
     { isActive },
   );
 
   return (
-    <Box flexDirection="column">
-      {items.map((item, index) => (
-        <Text color={index === selectedIndex ? "green" : undefined} key={index}>
-          {index === selectedIndex ? ">" : ""}
-          {items[index]}
-        </Text>
-      ))}
+    <Box {...styles.menu}>
+      {items.map((item, index) => {
+        const isSelected = index === selectedIndex;
+
+        return (
+          <Text
+            {...styles.menuItem}
+            key={item.label}
+            {...(isSelected ? styles.menuItemSelected : styles.menuItem)}
+          >
+            {isSelected ? "❯ " : "  "}
+            {item.label}
+          </Text>
+        );
+      })}
     </Box>
   );
 };

@@ -1,7 +1,7 @@
 import React, { createContext, type ReactNode, useContext, useState } from "react";
 
-import { createHomeStyles } from "@/screens/home.styles";
-import { createComponentStyles } from "@/screens/component.styles";
+import { createHomeStyles } from "@/styles/home.styles";
+import { createComponentStyles } from "@/styles/component.styles";
 
 // Due to dark and light mode being handled by ink / the native terminal, instead
 // of light and dark mode we can have varying themes for the application.
