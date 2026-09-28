@@ -1,5 +1,7 @@
 import React, { createContext, type ReactNode, useContext, useState } from "react";
 
+import { createHomeStyles } from "@/screens/home.styles";
+
 // Due to dark and light mode being handled by ink / the native terminal, instead
 // of light and dark mode we can have varying themes for the application.
 
@@ -7,6 +9,7 @@ interface ThemeContextType {
   theme: ThemeName;
   changeTheme: (theme: ThemeName) => void;
   colors: ColorScheme;
+  styles: BuiltStyles;
 }
 
 interface ThemeProps {
@@ -51,6 +54,33 @@ type ThemeName = keyof typeof themes; // "classic" | "cyber"
 const themeNames = Object.keys(themes) as ThemeName[]; // handy for cycling / pickers
 const isThemeName = (value: string): value is ThemeName => Object.hasOwn(themes, value);
 
+// To add a stylesheet:
+// 1. Create createXStyles in x.styles.ts
+// 2. Import it at the top
+// 3. Then register it here.
+const styleMap = {
+  home: createHomeStyles,
+} as const;
+
+// Helper types for stylesheets
+type StyleName = keyof typeof styleMap; // "home"
+type BuiltStyles = {
+  [K in StyleName]: ReturnType<(typeof styleMap)[K]>;
+};
+
+// Builds every stylesheet for one palette. The cast is safe because the keys
+// come from styleMap itself - Object.fromEntries just can't prove that.
+const buildStyles = (colors: ColorScheme): BuiltStyles =>
+  Object.fromEntries(
+    Object.entries(styleMap).map(([name, create]) => [name, create(colors)]),
+  ) as BuiltStyles;
+
+// Every theme's styles, built ONCE when the app starts. Switching themes just
+// picks a different set, and registering a new theme builds its set automatically.
+const STYLES = Object.fromEntries(
+  themeNames.map((name) => [name, buildStyles(themes[name])]),
+) as Record<ThemeName, BuiltStyles>;
+
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: ThemeProps) => {
@@ -59,9 +89,12 @@ export const ThemeProvider = ({ children }: ThemeProps) => {
   const changeTheme = (newTheme: ThemeName) => setTheme(newTheme);
 
   const colors = themes[theme]; // lookup replaces the switch
+  const styles = STYLES[theme]; // prebuilt, never rebuilt
 
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme, colors }}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={{ theme, changeTheme, colors, styles }}>
+      {children}
+    </ThemeContext.Provider>
   );
 };
 
@@ -69,4 +102,12 @@ export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) throw new Error("useTheme must be used inside <ThemeProvider>");
   return context;
+};
+
+/**
+ * A stylesheet for the active theme, by name - e.g. useStyles("home").
+ * Never rebuilds: it picks from the prebuilt STYLES.
+ */
+export const useStyles = <K extends StyleName>(name: K): BuiltStyles[K] => {
+  return useTheme().styles[name];
 };
