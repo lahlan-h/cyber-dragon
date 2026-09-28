@@ -4,6 +4,8 @@ import { Text, Box } from "ink";
 import { useTheme, useStyles } from "@/hooks/useTheme";
 import { usePi, type PiConnectionType } from "@/hooks/usePi";
 
+import Spinner from "@/components/Spinner";
+
 interface HeaderProps {
   title: string;
   version?: string;
@@ -35,7 +37,7 @@ const Header = ({ title, version }: HeaderProps) => {
       </Box>
       <Box {...styles.headerRight}>
         <Text {...styles.headerText} color={color}>
-          {icon} {status}
+          {status === "connecting" ? <Spinner /> : icon} {status}
         </Text>
       </Box>
     </Box>
