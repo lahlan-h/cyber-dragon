@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, type ReactNode } from "react";
 
-export type Screen = "home" | "flash" | "restore" | "settings" | "exit";
+export type Screen = "home" | "flash" | "restore" | "settings";
 
 interface NavigationContextType {
   screen: Screen;
@@ -16,7 +16,6 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 
 export const NavigationProvider = ({ children }: NavigationProps) => {
   const [history, setHistory] = useState<Screen[]>(["home"]); // start on home screen ...
-
   const screen = history[history.length - 1];
   const navigate = (next: Screen) => setHistory((h) => [...h, next]);
   const back = () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h));

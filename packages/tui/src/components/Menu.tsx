@@ -1,31 +1,28 @@
 import React, { useState } from "react";
 import { Text, Box, useInput } from "ink";
 
-import { useStyles, useTheme } from "@/hooks/useTheme";
-import { usePaneFocus } from "@/hooks/usePaneFocus";
+import { useStyles } from "@/hooks/useTheme";
+import { useNavigation, type Screen } from "@/hooks/useNavigation";
 
-// Other components will have to shape their menus to this
 export interface MenuItem {
   label: string;
   onSelect: () => void;
+  screen?: Screen; // set for items that open a screen; actions like Exit leave it out
 }
 
 interface MenuProps {
   items: MenuItem[];
   isActive: boolean;
-  menuWidth?: number;
 }
 
-const Menu = ({ items, isActive, menuWidth }: MenuProps) => {
+const Menu = ({ items, isActive }: MenuProps) => {
   const styles = useStyles("component");
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const { colors } = useTheme();
-  const { focus } = usePaneFocus();
-  const isFocused = focus === "menu";
+  const { screen } = useNavigation();
+  const [selectedIndex, setSelectedIndex] = useState(0); // only Menu needs this, so it lives here
 
   useInput(
     (input, key) => {
+      // "+ items.length" stops -1 at the top: in JS, -1 % 4 is -1, not 3
       if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
       if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
       if (key.return) items[selectedIndex].onSelect();
@@ -34,18 +31,20 @@ const Menu = ({ items, isActive, menuWidth }: MenuProps) => {
   );
 
   return (
-    <Box {...styles.menu} borderColor={isFocused ? colors.accent : colors.border}>
+    <Box {...styles.menu}>
       {items.map((item, index) => {
-        const isSelected = index === selectedIndex;
+        const isCursor = isActive && index === selectedIndex; // cursor only shows while the menu has the keyboard
+        const isOpen = item.screen === screen; // the screen currently on display
 
         return (
           <Text
-            {...styles.menuItem}
             key={item.label}
-            {...(isSelected ? styles.menuItemSelected : styles.menuItem)}
+            {...(isCursor ? styles.menuItemSelected : styles.menuItem)}
+            bold={isOpen}
           >
-            {isSelected ? "❯ " : "  "}
+            {isCursor ? "❯ " : "  "}
             {item.label}
+            {isOpen ? " •" : ""}
           </Text>
         );
       })}

@@ -6,7 +6,6 @@ import Home from "@/screens/Home";
 import Flash from "@/screens/Flash";
 import Restore from "@/screens/Restore";
 import Settings from "@/screens/Settings";
-import Exit from "@/screens/Exit";
 
 // Hooks
 import { type Screen, useNavigation } from "@/hooks/useNavigation";
@@ -18,7 +17,6 @@ const screens: Record<Screen, ComponentType> = {
   flash: Flash,
   restore: Restore,
   settings: Settings,
-  exit: Exit,
 };
 
 const Content = () => {

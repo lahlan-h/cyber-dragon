@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Box, useWindowSize, useApp, useInput } from "ink";
 
 // Custom Hooks
@@ -18,17 +18,18 @@ const App = () => {
   const { exit } = useApp();
   const { focus, setFocus } = usePaneFocus();
 
+  // Opening a screen hands the keyboard to it
   const open = (screen: Screen) => {
     navigate(screen);
     setFocus("content");
   };
 
   const menuItems: MenuItem[] = [
-    { label: "Home", onSelect: () => open("home") },
-    { label: "Flash", onSelect: () => open("flash") },
-    { label: "Restore", onSelect: () => open("restore") },
-    { label: "Settings", onSelect: () => open("settings") },
-    { label: "Exit", onSelect: exit },
+    { label: "Home", screen: "home", onSelect: () => open("home") },
+    { label: "Flash", screen: "flash", onSelect: () => open("flash") },
+    { label: "Restore", screen: "restore", onSelect: () => open("restore") },
+    { label: "Settings", screen: "settings", onSelect: () => open("settings") },
+    { label: "Exit", onSelect: exit }, // an action, so no screen
   ];
 
   // Esc hands keyboard back to the menu
