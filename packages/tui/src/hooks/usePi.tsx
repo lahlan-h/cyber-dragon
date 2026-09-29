@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode, } from "react";
 import type { ClientMessage, ServerMessage, Step } from "@cyber-dragon/shared";
 
+import { useNotification } from "./useNotification";
+
 export type PiConnectionType = "disconnected" | "connecting" | "connected";
 
 export type PipelineStage =
@@ -69,6 +71,7 @@ const pipelineReducer = (state: PipelineState, msg: ServerMessage): PipelineStat
 const PiContext = createContext<PiContextType | null>(null);
 
 export const PiProvider = ({ url, children }: PiProps) => {
+  const { notify } = useNotification();
   const [enabled, setEnabled] = useState<boolean>(true);
   const [status, setStatus] = useState<PiConnectionType>("connecting");
   const [connectionId, setConnectionId] = useState(0); // incrementing this triggers a fresh connection
@@ -86,7 +89,10 @@ export const PiProvider = ({ url, children }: PiProps) => {
     };
 
     socket.onclose = () => {
-      if (active) setStatus("disconnected");
+      if (active) {
+        setStatus("disconnected");
+        notify("Disconnected from the Pi unexpectedly", "high");
+      }
     };
 
     socket.onmessage = (event) => {
