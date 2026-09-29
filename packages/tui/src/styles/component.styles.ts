@@ -18,7 +18,7 @@ export const createComponentStyles = (colors: ColorScheme) =>
       width: "15%",
     },
     menuItem: {},
-    menuItemSelected: { color: colors.accent, bold: true },
+    menuItemSelected: { color: colors.selected, bold: true },
     screenHeader: { paddingX: 2, gap: 2, flexDirection: "row" },
     screenHeaderTitle: { bold: true },
     screenHeaderSubtitle: { color: colors.muted },
@@ -28,5 +28,5 @@ export const createComponentStyles = (colors: ColorScheme) =>
     sectionTitle: { color: colors.accent, bold: true },
     sectionChildren: { flexDirection: "column", paddingX: 4, gap: 0 },
     settingRowSelect: { width: 2 },
-    settingRowSelectText: { color: colors.accent },
+    settingRowSelectText: { color: colors.selected },
   }) satisfies Record<string, BoxProps | TextProps>;

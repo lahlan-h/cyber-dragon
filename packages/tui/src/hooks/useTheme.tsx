@@ -20,6 +20,7 @@ interface ThemeProps {
 
 export interface ColorScheme {
   accent: string;
+  selected: string;
   muted: string;
   border: string;
   success: string;
@@ -29,6 +30,7 @@ export interface ColorScheme {
 
 const classic: ColorScheme = {
   accent: "cyan",
+  selected: "magentaBright",
   muted: "gray",
   border: "gray",
   success: "green",
@@ -39,6 +41,7 @@ const classic: ColorScheme = {
 const cyber: ColorScheme = {
   ...classic, // copy classic, override only what changes
   accent: "magenta",
+  selected: "cyanBright",
   border: "magenta",
 };
 
@@ -51,6 +54,7 @@ const ocean: ColorScheme = {
 const neon: ColorScheme = {
   ...classic,
   accent: "cyanBright",
+  selected: "blueBright",
   border: "magentaBright",
 };
 

@@ -14,7 +14,7 @@ const LABEL_WIDTH = 16; // fixed width so every value lines up in one column
 
 const SettingRow = ({ label, value, isSelected, isReadOnly }: SettingRow) => {
   const { colors } = useTheme();
-  const color = isReadOnly ? colors.muted : isSelected ? colors.accent : undefined;
+  const color = isReadOnly ? colors.muted : isSelected ? colors.selected : undefined;
 
   const styles = useStyles("component");
 
