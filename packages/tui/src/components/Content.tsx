@@ -3,7 +3,7 @@ import { Text, Box } from "ink";
 
 // Screens
 import Home from "@/screens/Home";
-import Flash from "@/screens/Flash";
+import Flash from "@/screens/flash/Flash";
 import Restore from "@/screens/Restore";
 import Settings from "@/screens/Settings";
 
