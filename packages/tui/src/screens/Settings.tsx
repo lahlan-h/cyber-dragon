@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Box, useInput } from "ink";
+import { Box, useInput } from "ink";
 
 import { useNavigation } from "@/hooks/useNavigation";
 import { usePi } from "@/hooks/usePi";
@@ -27,6 +27,7 @@ const Settings = () => {
       <Section title="Connection">
         <SettingRow label="Pi address" value={url} isReadOnly={true} />
         <SettingRow label="Status" value={<ConnectionStatus />} isReadOnly={true} />
+        <SettingRow label="Reconnect" value={"press enter"} isSelected={true} />
       </Section>
     </Box>
   );

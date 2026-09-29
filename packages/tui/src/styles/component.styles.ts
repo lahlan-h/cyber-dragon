@@ -26,6 +26,6 @@ export const createComponentStyles = (colors: ColorScheme) =>
     sectionHeader: { paddingX: 2 },
     sectionTitle: { color: colors.accent, bold: true },
     sectionChildren: { flexDirection: "column", paddingX: 4, gap: 0 },
-    settingRowSelect: { paddingX: 1 },
+    settingRowSelect: { width: 2 },
     settingRowSelectText: { color: colors.accent },
   }) satisfies Record<string, BoxProps | TextProps>;
