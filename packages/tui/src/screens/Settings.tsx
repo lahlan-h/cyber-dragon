@@ -10,7 +10,7 @@ import Section from "@/components/Section";
 import SettingRow from "@/components/SettingRow";
 import ConnectionStatus from "@/components/ConnectionStatus";
 
-import { FLASH_DIR, FLASH_DIR_LABEL } from "@/config/config";
+import { FLASH_DIR } from "@/config/config";
 
 const ROWS = ["reconnect", "theme"] as const; // only interactive rows, do not include rows you want cursor to skip
 type Row = (typeof ROWS)[number]; // turns the list into a type: "reconnect" | "theme"
