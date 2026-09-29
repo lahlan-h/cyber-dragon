@@ -8,6 +8,7 @@
     "triage": "tsx src/index.tsx"
   },
   "dependencies": {
+    "@cyber-dragon/shared": "*",
     "chalk": "^5.6.2",
     "ink": "7.1.1",
     "react": "^19.2.7"
