@@ -7,7 +7,7 @@ const Spinner = () => {
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
-    const timer = setInterval(() => setFrame((f) => (f + 1) % frames.length), 750);
+    const timer = setInterval(() => setFrame((f) => (f + 1) % frames.length), 350);
     return () => clearInterval(timer);
   }, []);
 

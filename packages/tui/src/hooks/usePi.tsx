@@ -20,6 +20,7 @@ interface PiContextType {
   send: (msg: ClientMessage) => boolean;
   upload: (filename: string, content: string) => boolean;
   reconnect: () => void;
+  url: string;
 }
 
 interface PiProps {
@@ -117,7 +118,7 @@ export const PiProvider = ({ url, children }: PiProps) => {
   const upload = (filename: string, content: string) => send({ type: "upload", filename, content });
 
   return (
-    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect }}>
+    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, url }}>
       {children}
     </PiContext.Provider>
   );

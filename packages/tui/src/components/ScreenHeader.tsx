@@ -12,7 +12,12 @@ const ScreenHeader = ({ title, subtitle }: ScreenHeader) => {
   const styles = useStyles("component");
   const { colors } = useTheme();
 
-  return <Box></Box>;
+  return (
+    <Box {...styles.screenHeader}>
+      <Text {...styles.screenHeaderTitle}>{title}</Text>
+      {subtitle && <Text {...styles.screenHeaderSubtitle}>{subtitle}</Text>}
+    </Box>
+  );
 };
 
 export default ScreenHeader;

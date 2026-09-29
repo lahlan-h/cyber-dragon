@@ -19,4 +19,13 @@ export const createComponentStyles = (colors: ColorScheme) =>
     },
     menuItem: {},
     menuItemSelected: { color: colors.accent, bold: true },
+    screenHeader: { paddingX: 2, gap: 2, flexDirection: "row" },
+    screenHeaderTitle: { bold: true },
+    screenHeaderSubtitle: { color: colors.muted },
+    section: { flexDirection: "column", gap: 1 },
+    sectionHeader: { paddingX: 2 },
+    sectionTitle: { color: colors.accent, bold: true },
+    sectionChildren: { flexDirection: "column", paddingX: 4, gap: 0 },
+    settingRowSelect: { paddingX: 1 },
+    settingRowSelectText: { color: colors.accent },
   }) satisfies Record<string, BoxProps | TextProps>;
