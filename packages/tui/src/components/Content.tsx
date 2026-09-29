@@ -10,7 +10,6 @@ import Settings from "@/screens/Settings";
 // Hooks
 import { type Screen, useNavigation } from "@/hooks/useNavigation";
 import { useTheme, useStyles } from "@/hooks/useTheme";
-import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 const screens: Record<Screen, ComponentType> = {
   home: Home,
@@ -21,11 +20,9 @@ const screens: Record<Screen, ComponentType> = {
 
 const Content = () => {
   const styles = useStyles("component");
-  const { screen } = useNavigation();
-
-  const { colors } = useTheme();
-  const { focus } = usePaneFocus();
+  const { screen, focus } = useNavigation();
   const isFocused = focus === "content";
+  const { colors } = useTheme();
 
   const Current = screens[screen];
 

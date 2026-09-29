@@ -3,7 +3,6 @@ import { Text, Box, useInput } from "ink";
 
 import { useStyles, useTheme } from "@/hooks/useTheme";
 import { useNavigation, type Screen } from "@/hooks/useNavigation";
-import { usePaneFocus } from "@/hooks/usePaneFocus";
 
 export interface MenuItem {
   label: string;
@@ -20,11 +19,9 @@ const Menu = ({ items, isActive }: MenuProps) => {
   const styles = useStyles("component");
   const { colors } = useTheme();
 
-  const { screen } = useNavigation();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const { focus, setFocus } = usePaneFocus();
+  const { screen, focus, focusMenu } = useNavigation();
   const isFocused = focus === "menu";
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useInput(
     (input, key) => {
