@@ -7,15 +7,15 @@ function Footer() {
   const styles = useStyles("component");
 
   return (
-    <Box {...styles.footer}>
-      <Box {...styles.footerLeft}>
-        <Text {...styles.footerText}>↑/↓ navigate • enter select • esc menu</Text>
+    <Box {...styles.bar}>
+      <Box {...styles.barLeft}>
+        <Text {...styles.barText}>↑/↓ navigate • enter select • esc menu</Text>
       </Box>
-      <Box {...styles.footerCenter}>
-        <Text {...styles.footerText}></Text>
+      <Box {...styles.barCenter}>
+        <Text {...styles.barText}></Text>
       </Box>
-      <Box {...styles.footerRight}>
-        <Text {...styles.footerText}></Text>
+      <Box {...styles.barRight}>
+        <Text {...styles.barText}></Text>
       </Box>
     </Box>
   );

@@ -28,15 +28,15 @@ const Header = ({ title, version }: HeaderProps) => {
   const { icon, color } = connectionStatusDisplay(status);
 
   return (
-    <Box {...styles.header}>
-      <Box {...styles.headerLeft}>
-        <Text {...styles.headerText}>{version === undefined ? "" : version}</Text>
+    <Box {...styles.bar}>
+      <Box {...styles.barLeft}>
+        <Text {...styles.barText}>{version === undefined ? "" : version}</Text>
       </Box>
-      <Box {...styles.headerCenter}>
-        <Text {...styles.headerText}>{title}</Text>
+      <Box {...styles.barCenter}>
+        <Text {...styles.barText}>{title}</Text>
       </Box>
-      <Box {...styles.headerRight}>
-        <Text {...styles.headerText} color={color}>
+      <Box {...styles.barRight}>
+        <Text {...styles.barText} color={color}>
           {status === "connecting" ? <Spinner /> : icon} {status}
         </Text>
       </Box>
