@@ -129,7 +129,8 @@ const handle = (msg: ClientMessage) => {
 };
 
 wss.on("connection", (socket) => {
-  console.log("TUI connected");
+  const id = crypto.randomUUID();
+  console.log("TUI connected: ", id);
   socket.on("error", console.error);
   socket.on("close", () => console.log("TUI disconnected"));
 

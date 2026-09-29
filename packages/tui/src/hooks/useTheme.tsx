@@ -11,6 +11,7 @@ interface ThemeContextType {
   changeTheme: (theme: ThemeName) => void;
   colors: ColorScheme;
   styles: BuiltStyles;
+  cycleTheme: (direction: 1 | -1) => void;
 }
 
 interface ThemeProps {
@@ -41,6 +42,18 @@ const cyber: ColorScheme = {
   border: "magenta",
 };
 
+const ocean: ColorScheme = {
+  ...classic,
+  accent: "blueBright",
+  border: "blue",
+};
+
+const neon: ColorScheme = {
+  ...classic,
+  accent: "cyanBright",
+  border: "magentaBright",
+};
+
 // To add a theme:
 // 1. Create a palette above
 // 2. Then register it here.
@@ -48,6 +61,8 @@ const cyber: ColorScheme = {
 const themes = {
   classic,
   cyber,
+  ocean,
+  neon,
 } satisfies Record<string, ColorScheme>;
 
 // Helper types for theme names and validation
@@ -90,11 +105,17 @@ export const ThemeProvider = ({ children }: ThemeProps) => {
 
   const changeTheme = (newTheme: ThemeName) => setTheme(newTheme);
 
+  const cycleTheme = (direction: 1 | -1) =>
+    setTheme((current) => {
+      const index = themeNames.indexOf(current);
+      return themeNames[(index + direction + themeNames.length) % themeNames.length];
+    });
+
   const colors = themes[theme]; // lookup replaces the switch
   const styles = STYLES[theme]; // prebuilt, never rebuilt
 
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme, colors, styles }}>
+    <ThemeContext.Provider value={{ theme, changeTheme, colors, styles, cycleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -22,6 +22,7 @@ export const createComponentStyles = (colors: ColorScheme) =>
     screenHeader: { paddingX: 2, gap: 2, flexDirection: "row" },
     screenHeaderTitle: { bold: true },
     screenHeaderSubtitle: { color: colors.muted },
+    settingsContainer: { flexDirection: "column", gap: 1 },
     section: { flexDirection: "column", gap: 1 },
     sectionHeader: { paddingX: 2 },
     sectionTitle: { color: colors.accent, bold: true },
