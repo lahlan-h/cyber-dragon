@@ -20,7 +20,7 @@ interface PiContextType {
   send: (msg: ClientMessage) => boolean;
   upload: (filename: string, content: string) => boolean;
   reconnect: () => void;
-  url: string;
+  disconnect: () => void;
 }
 
 interface PiProps {
@@ -69,13 +69,16 @@ const pipelineReducer = (state: PipelineState, msg: ServerMessage): PipelineStat
 const PiContext = createContext<PiContextType | null>(null);
 
 export const PiProvider = ({ url, children }: PiProps) => {
+  const [enabled, setEnabled] = useState<boolean>(true);
   const [status, setStatus] = useState<PiConnectionType>("connecting");
   const [connectionId, setConnectionId] = useState(0); // incrementing this triggers a fresh connection
   const [pipeline, dispatch] = useReducer(pipelineReducer, initialPipeline);
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    let active = true;
+    if (!enabled) return; // disconnected on purpose - no socket
+
+    let active = true; // is THIS socket still the current one?
     const socket = new WebSocket(url);
 
     socket.onopen = () => {
@@ -96,14 +99,20 @@ export const PiProvider = ({ url, children }: PiProps) => {
     ws.current = socket;
 
     return () => {
-      active = false;
+      active = false; // retire this socket - never change state here
       socket.close();
     };
-  }, [url, connectionId]); // runs on mount, when url changes, and on every reconnect
+  }, [url, connectionId, enabled]); // runs on mount, when url changes, on reconnect, and when enabled flips
 
   const reconnect = () => {
+    setEnabled(true);
     setStatus("connecting");
     setConnectionId((id) => id + 1);
+  };
+
+  const disconnect = () => {
+    setEnabled(false); // the effect's cleanup closes the socket
+    setStatus("disconnected");
   };
 
   // returns false if the message couldn't be sent, rather than dropping it silently
@@ -118,7 +127,7 @@ export const PiProvider = ({ url, children }: PiProps) => {
   const upload = (filename: string, content: string) => send({ type: "upload", filename, content });
 
   return (
-    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, url }}>
+    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, disconnect }}>
       {children}
     </PiContext.Provider>
   );

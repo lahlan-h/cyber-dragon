@@ -10,14 +10,14 @@ import Section from "@/components/Section";
 import SettingRow from "@/components/SettingRow";
 import ConnectionStatus from "@/components/ConnectionStatus";
 
-import { FLASH_DIR } from "@/config/config";
+import { FLASH_DIR, PI_URL } from "@/config/config";
 
-const ROWS = ["reconnect", "theme"] as const; // only interactive rows, do not include rows you want cursor to skip
+const ROWS = ["reconnect", "disconnect", "theme"] as const; // only interactive rows, do not include rows you want cursor to skip
 type Row = (typeof ROWS)[number]; // turns the list into a type: "reconnect" | "theme"
 
 const Settings = () => {
   const styles = useStyles("component");
-  const { url, reconnect } = usePi();
+  const { reconnect, disconnect } = usePi();
   const { theme, cycleTheme } = useTheme();
   const { focus, focusMenu } = useNavigation();
   const [rowIndex, setRowIndex] = useState(0);
@@ -32,6 +32,11 @@ const Settings = () => {
 
       if (selected === "reconnect") {
         if (key.return) reconnect();
+        if (key.leftArrow) focusMenu();
+      }
+
+      if (selected === "disconnect") {
+        if (key.return) disconnect();
         if (key.leftArrow) focusMenu();
       }
 
@@ -51,9 +56,10 @@ const Settings = () => {
       <ScreenHeader title="Settings" subtitle={"Connection, theme and files"} />
 
       <Section title="CONNECTION">
-        <SettingRow label="Pi address" value={url} isReadOnly={true} />
+        <SettingRow label="Pi address" value={PI_URL} isReadOnly={true} />
         <SettingRow label="Status" value={<ConnectionStatus />} isReadOnly={true} />
-        <SettingRow label="Reconnect" value={"press enter"} isSelected={isRow("reconnect")} />
+        <SettingRow label="Reconnect" value={"(press enter)"} isSelected={isRow("reconnect")} />
+        <SettingRow label="Disconnect" value={"(press enter)"} isSelected={isRow("disconnect")} />
       </Section>
 
       <Section title="APPEARANCE">
