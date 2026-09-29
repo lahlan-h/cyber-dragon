@@ -24,7 +24,7 @@ const FilePicker = () => {
   const isFocused = focus === "content";
   const isConnected = status === "connected";
 
-  // Read the folder once when the view opens, keeping only .st files
+  // read the folder once when the view opens, keeping only .st files
   useEffect(() => {
     readdir(FLASH_DIR)
       .then((names) => {
@@ -38,7 +38,7 @@ const FilePicker = () => {
       });
   }, []);
 
-  // Warn whenever the connection is down: on open, and if it drops while you're here
+  // warn whenever the connection is down: on open, and if it drops while you're here
   useEffect(() => {
     if (!isConnected) notify("Not connected to the Pi: uploads are disabled", "medium");
   }, [isConnected]);
