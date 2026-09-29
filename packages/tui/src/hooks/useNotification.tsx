@@ -35,15 +35,20 @@ export const NotificationProvider = ({ children }: NotificationProps) => {
   const notification = queue[0] ?? null; // the front of the queue is what's showing
   const pending = Math.max(0, queue.length - 1);
 
-  // Join the back of the queue
-  const notify = (message: string, priority: NotificationPriority = "low") =>
-    setQueue((q) => [...q, { message, priority }].slice(-MAX_QUEUED));
+  const RANK: Record<NotificationPriority, number> = { low: 0, medium: 1, high: 2 };
 
-  // Remove the front, so the next one moves up
+  // join the queue, anything less important than the new one is dropped, so it shows straight away
+  const notify = (message: string, priority: NotificationPriority = "low") =>
+    setQueue((q) => {
+      const kept = q.filter((n) => RANK[n.priority] >= RANK[priority]);
+      return [...kept, { message, priority }].slice(-MAX_QUEUED);
+    });
+
+  // remove the front, so the next one moves up
   const dismiss = () => setQueue((q) => q.slice(1));
 
-  // Give whatever is at the front a few seconds, then move on.
-  // Adding to the back doesn't restart the clock - only a new front does.
+  // give whatever is at the front a few seconds, then move on.
+  // adding to the back doesn't restart the clock, only a new front does.
   useEffect(() => {
     if (notification === null) return;
     const timer = setTimeout(dismiss, DISMISS_AFTER_MS);
