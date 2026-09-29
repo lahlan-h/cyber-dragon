@@ -45,7 +45,7 @@ const Settings = () => {
   const isRow = (row: Row) => isFocused && selected === row;
 
   return (
-    <Box {...styles.settingsContainer}>
+    <Box {...styles.screenContainer}>
       <ScreenHeader title="Settings" subtitle={"Connection, theme and files"} />
 
       <Section title="CONNECTION">

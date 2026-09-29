@@ -20,7 +20,7 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 
 // hook owns "where the user is", what screen is open, an which pane has the keyboard
 export const NavigationProvider = ({ children }: NavigationProps) => {
-  const [history, setHistory] = useState<Screen[]>(["settings"]); // start on home screen ...
+  const [history, setHistory] = useState<Screen[]>(["home"]); // start on home screen ...
   const [focus, setFocus] = useState<Pane>("menu"); // start on the menu
 
   const screen = history[history.length - 1];
