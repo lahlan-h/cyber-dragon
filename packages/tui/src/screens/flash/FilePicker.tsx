@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Text, Box, useInput } from "ink";
 import { join } from "node:path";
 
-import { useNavigation } from "@/hooks/useNavigation";
+import { useNotification } from "@/hooks/useNotification";
 import { useStyles, useTheme } from "@/hooks/useTheme";
+import { useNavigation } from "@/hooks/useNavigation";
 import { usePi } from "@/hooks/usePi";
 
 import ScreenHeader from "@/components/ScreenHeader";
@@ -14,6 +15,7 @@ import { FLASH_DIR } from "@/config/config";
 const FilePicker = () => {
   const styles = useStyles("component");
   const { colors } = useTheme();
+  const { notify } = useNotification();
   const { status, pipeline, upload } = usePi();
   const { focus, focusMenu } = useNavigation();
   const [files, setFiles] = useState<string[]>([]);
@@ -22,12 +24,24 @@ const FilePicker = () => {
   const isFocused = focus === "content";
   const isConnected = status === "connected";
 
-  // read the folder once on mount not on every component re-render, keeping only .st files
+  // Read the folder once when the view opens, keeping only .st files
   useEffect(() => {
     readdir(FLASH_DIR)
-      .then((names) => setFiles(names.filter((name) => name.toLowerCase().endsWith(".st"))))
-      .catch(() => setFiles([])); // folder missing - show the empty state
+      .then((names) => {
+        const stFiles = names.filter((name) => name.toLowerCase().endsWith(".st"));
+        setFiles(stFiles);
+        if (stFiles.length === 0) notify("No .st files to upload: folder is empty", "medium");
+      })
+      .catch(() => {
+        setFiles([]); // folder missing - show the empty state
+        notify("Upload folder missing", "high");
+      });
   }, []);
+
+  // Warn whenever the connection is down: on open, and if it drops while you're here
+  useEffect(() => {
+    if (!isConnected) notify("Not connected to the Pi: uploads are disabled", "medium");
+  }, [isConnected]);
 
   useInput(
     (input, key) => {
@@ -69,9 +83,6 @@ const FilePicker = () => {
             </Text>
           );
         })}
-        {!isConnected && (
-          <Text color={colors.warning}>Not connected to the Pi - uploads are disabled</Text>
-        )}
       </Box>
     </Box>
   );

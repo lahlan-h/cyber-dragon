@@ -3,6 +3,8 @@ import { Text, Box } from "ink";
 
 import { useStyles } from "@/hooks/useTheme";
 
+import NotificationMessage from "./NotificationMessage";
+
 function Footer() {
   const styles = useStyles("component");
 
@@ -12,7 +14,9 @@ function Footer() {
         <Text {...styles.barText}>↑/↓ navigate • enter select • esc menu</Text>
       </Box>
       <Box {...styles.barRight}>
-        <Text {...styles.barText}></Text>
+        <Text {...styles.barText}>
+          <NotificationMessage />
+        </Text>
       </Box>
     </Box>
   );
