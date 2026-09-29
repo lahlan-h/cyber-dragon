@@ -23,14 +23,14 @@ const Menu = ({ items, isActive }: MenuProps) => {
   const { screen } = useNavigation();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const { focus } = usePaneFocus();
+  const { focus, setFocus } = usePaneFocus();
   const isFocused = focus === "menu";
 
   useInput(
     (input, key) => {
       if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
       if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
-      if (key.return) items[selectedIndex].onSelect();
+      if (key.return || key.rightArrow) items[selectedIndex].onSelect();
     },
     { isActive },
   );

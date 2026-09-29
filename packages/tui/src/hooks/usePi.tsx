@@ -29,6 +29,9 @@ export const PiProvider = ({ url, children }: PiProps) => {
     return () => socket.close();
   }, [url]);
 
+  // Implement Later
+  const reconnect = () => {};
+
   const send = (msg: string) => {
     if (status === "connected" && ws.current !== null) ws.current.send(JSON.stringify(msg));
   };

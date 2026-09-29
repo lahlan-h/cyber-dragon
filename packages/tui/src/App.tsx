@@ -35,6 +35,7 @@ const App = () => {
   // Esc hands keyboard back to the menu
   useInput((input, key) => {
     if (key.escape) setFocus("menu");
+    if (key.leftArrow) setFocus("menu");
   });
 
   return (
