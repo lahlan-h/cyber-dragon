@@ -80,19 +80,20 @@ export const PiProvider = ({ url, children }: PiProps) => {
 
   useEffect(() => {
     if (!enabled) return; // disconnected on purpose - no socket
-
     let active = true; // is THIS socket still the current one?
+    let opened = false;
     const socket = new WebSocket(url);
 
     socket.onopen = () => {
-      if (active) setStatus("connected");
+      if (!active) return;
+      opened = true;
+      setStatus("connected");
     };
 
     socket.onclose = () => {
-      if (active) {
-        setStatus("disconnected");
-        notify("Disconnected from the Pi unexpectedly", "high");
-      }
+      if (!active) return;
+      setStatus("disconnected");
+      if (opened) notify("Disconnected from the Pi unexpectedly", "high");
     };
 
     socket.onmessage = (event) => {
