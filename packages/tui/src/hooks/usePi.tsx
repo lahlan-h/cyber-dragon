@@ -23,6 +23,7 @@ interface PiContextType {
   upload: (filename: string, content: string) => boolean;
   reconnect: () => void;
   disconnect: () => void;
+  startFlash: () => boolean;
 }
 
 interface PiProps {
@@ -133,8 +134,14 @@ export const PiProvider = ({ url, children }: PiProps) => {
   // Sends a program to the Pi. Returns false if we're not connected.
   const upload = (filename: string, content: string) => send({ type: "upload", filename, content });
 
+  // Returns false if we're not at the checklist, or not connected
+  const startFlash = () => {
+    if (pipeline.stage !== "awaiting_flash") return false;
+    return send({ type: "flash", confirm: true });
+  };
+
   return (
-    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, disconnect }}>
+    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, disconnect, startFlash }}>
       {children}
     </PiContext.Provider>
   );

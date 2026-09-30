@@ -70,7 +70,9 @@ const FilePicker = () => {
 
       <Box {...styles.filePickerContainer}>
         <Text {...styles.textMuted}>{FLASH_DIR}</Text>
+
         {files.length === 0 && <Text {...styles.textMuted}>No .st files here yet</Text>}
+
         {files.map((name, index) => {
           const isCursor = isFocused && index === selectedIndex;
           return (

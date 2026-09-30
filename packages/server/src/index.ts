@@ -2,23 +2,29 @@
 // Swap the fake steps for iec2c/pio (build) and the system stm32flash (flash) once the TUI side is working.
 import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, ServerMessage } from "@cyber-dragon/shared";
+import { FAKE_BUILD_LOG } from "./fakeBuildLog";
+
+type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
 const PORT = 3000;
 const MAX_FLASH_ATTEMPTS = 4;
 const MOCK_FLASH_FAIL_RATE = 0.25; // the real stm32flash fails about 1 in 4 - mimic it
 const RETRY_DELAY_MS = 1000;
 
+/*
 const FAKE_BUILD_LOG = [
   "Processing fx3u_24_raw (platform: ststm32)",
   "Compiling plc_prog.st ...",
   "Linking firmware.elf",
   "Building firmware.bin",
 ];
+*/
 
 const FLASH_CHECKLIST = ["Power off board", "BOOT0 switch to bootloader (3.3V)", "Power on"];
 
 // One board, one pipeline: this state is shared by every connected client
-let stage: "idle" | "building" | "awaiting_flash" | "flashing" = "idle";
+let stage: ServerStage = "idle";
+
 let run = 0; // bumped on every new upload or cancel - older runs notice and stop
 
 const wss = new WebSocketServer({ host: "127.0.0.1", port: PORT });
@@ -38,6 +44,7 @@ const fakeBuild = async (myRun: number) => {
   broadcast({ type: "build_start" });
 
   for (const line of FAKE_BUILD_LOG) {
+    // Utilise a logarithimic func to determine random time
     await sleep(400);
     if (myRun !== run) return; // a newer run (or a cancel) replaced this one
     broadcast({ type: "build_log", line });

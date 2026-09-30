@@ -33,6 +33,8 @@ export const createComponentStyles = (colors: ColorScheme) =>
       flexDirection: "column",
       borderStyle: "round",
       borderColor: colors.border,
+      gap: 1,
+      paddingX: 2,
       flexGrow: 1,
     },
     textSuccess: { color: colors.success },
