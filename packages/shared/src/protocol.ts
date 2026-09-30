@@ -2,6 +2,7 @@
 // Communication format (i.e., WiFi/BLE) will not affect this.
 
 export type Step = "upload" | "build" | "flash";
+type NotificationPriority = "low" | "medium" | "high";
 
 // Client -> server
 export type ClientMessage =
@@ -19,4 +20,4 @@ export type ServerMessage =
   | { type: "flash_start"; attempt: number; maxAttempts: number } // sent before each try
   | { type: "flash_progress"; percent: number }
   | { type: "flash_result"; success: boolean }
-  | { type: "error"; stage: Step; message: string };
+  | { type: "error"; stage: Step; message: string; priority?: NotificationPriority };

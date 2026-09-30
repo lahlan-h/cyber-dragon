@@ -101,7 +101,7 @@ const handle = (msg: ClientMessage) => {
   switch (msg.type) {
     case "upload": {
       if (stage === "building" || stage === "flashing") {
-        broadcast({ type: "error", stage: "upload", message: "Pipeline busy" });
+        broadcast({ type: "error", stage: "upload", message: "Pipeline busy", priority: "medium" });
         return;
       }
       run++;

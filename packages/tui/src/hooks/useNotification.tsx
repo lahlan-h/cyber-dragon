@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-export type NotificationPriority = "low" | "medium" | "high";
+type NotificationPriority = "low" | "medium" | "high";
 
 interface Notification {
   message: string;

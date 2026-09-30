@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, type ReactNode } from "react";
 import { Text, Box } from "ink";
 
 import { useTheme, useStyles } from "@/hooks/useTheme";
 
 interface ScreenHeader {
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
 }
 
 const ScreenHeader = ({ title, subtitle }: ScreenHeader) => {
