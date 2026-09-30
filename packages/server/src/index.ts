@@ -45,7 +45,7 @@ const fakeBuild = async (myRun: number) => {
 
   for (const line of FAKE_BUILD_LOG) {
     // Utilise a logarithimic func to determine random time
-    await sleep(400);
+    await sleep(10);
     if (myRun !== run) return; // a newer run (or a cancel) replaced this one
     broadcast({ type: "build_log", line });
   }

@@ -37,6 +37,13 @@ export const createComponentStyles = (colors: ColorScheme) =>
       paddingX: 2,
       flexGrow: 1,
     },
+    logBox: {
+      flexDirection: "column",
+      borderStyle: "round",
+      borderColor: colors.border,
+      paddingX: 1,
+      flexGrow: 1,
+    },
     textSuccess: { color: colors.success },
     textDanger: { color: colors.danger },
     textMuted: { color: colors.muted },
