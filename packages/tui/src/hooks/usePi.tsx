@@ -23,6 +23,7 @@ interface PiContextType {
   upload: (filename: string, content: string) => boolean;
   reconnect: () => void;
   disconnect: () => void;
+  cancel: () => boolean;
   startFlash: () => boolean;
 }
 
@@ -52,8 +53,10 @@ const initialPipeline: PipelineState = {
   error: null,
 };
 
+type PipelineAction = ServerMessage | { type: "reset" }; // server messages, plus "forget everything"
+
 // Folds each server message into the pipeline state, in order
-const pipelineReducer = (state: PipelineState, msg: ServerMessage): PipelineState => {
+const pipelineReducer = (state: PipelineState, msg: PipelineAction): PipelineState => {
   // prettier-ignore
   switch (msg.type) {
     case "upload_ack": return { ...state, stage: "uploaded", error: null };
@@ -65,6 +68,7 @@ const pipelineReducer = (state: PipelineState, msg: ServerMessage): PipelineStat
     case "flash_progress": return { ...state, progress: msg.percent };
     case "flash_result": return { ...state, stage: msg.success ? "done" : "failed" };
     case "error": return { ...state, stage: "failed", error: { stage: msg.stage, message: msg.message } };
+    case "reset": return initialPipeline;
     default: return state; // unknown message: ignore it
   }
 };
@@ -83,9 +87,17 @@ export const PiProvider = ({ url, children }: PiProps) => {
   const announce = (msg: ServerMessage) => {
     if (msg.type === "flash_result")
       notify(msg.success ? "Flashed successfully" : "Flash failed", msg.success ? "low" : "high");
-    if (msg.type === "build_result" && !msg.success) notify("Build failed - check the log", "high");
+    if (msg.type === "build_result")
+      notify(
+        msg.success ? "Build succeeded" : "Build failed - check the log",
+        msg.success ? "low" : "high",
+      );
     if (msg.type === "error") notify(msg.message, "high");
   };
+
+  useEffect(() => {
+    if (status !== "connected") dispatch({ type: "reset" });
+  }, [status]);
 
   useEffect(() => {
     if (!enabled) return; // disconnected on purpose - no socket
@@ -144,6 +156,9 @@ export const PiProvider = ({ url, children }: PiProps) => {
   // Sends a program to the Pi. Returns false if we're not connected.
   const upload = (filename: string, content: string) => send({ type: "upload", filename, content });
 
+  // Asks the server to stop - its reply updates the pipeline
+  const cancel = () => send({ type: "cancel" });
+
   // Returns false if we're not at the checklist, or not connected
   const startFlash = () => {
     if (pipeline.stage !== "awaiting_flash") return false;
@@ -151,7 +166,9 @@ export const PiProvider = ({ url, children }: PiProps) => {
   };
 
   return (
-    <PiContext.Provider value={{ status, pipeline, send, upload, reconnect, disconnect, startFlash }}>
+    <PiContext.Provider
+      value={{ status, pipeline, send, upload, reconnect, disconnect, cancel, startFlash }}
+    >
       {children}
     </PiContext.Provider>
   );

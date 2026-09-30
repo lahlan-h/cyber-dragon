@@ -44,7 +44,13 @@ export const createComponentStyles = (colors: ColorScheme) =>
       paddingX: 1,
       flexGrow: 1,
     },
+    logBoxOptions: {
+      paddingX: 2,
+    },
     textSuccess: { color: colors.success },
     textDanger: { color: colors.danger },
     textMuted: { color: colors.muted },
+    progressContainer: { flexDirection: "column", gap: 1, paddingX: 2, flexGrow: 1 },
+    progressFilled: { color: colors.accent },
+    progressEmpty: { color: colors.muted },
   }) satisfies Record<string, BoxProps | TextProps>;

@@ -9,7 +9,9 @@ import FilePicker from "./FilePicker";
 import FlashProgress from "./FlashProgress";
 
 const Flash = () => {
-  const { pipeline } = usePi();
+  const { pipeline, status } = usePi();
+
+  if (status !== "connected") return <FilePicker />;
 
   // prettier-ignore
   switch (pipeline.stage) {

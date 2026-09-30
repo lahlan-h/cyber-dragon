@@ -8,7 +8,7 @@ type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
 const PORT = 3000;
 const MAX_FLASH_ATTEMPTS = 4;
-const MOCK_FLASH_FAIL_RATE = 0.25; // the real stm32flash fails about 1 in 4 - mimic it
+const MOCK_FLASH_FAIL_RATE = 0.95; // the real stm32flash fails about 1 in 4 - mimic it
 const RETRY_DELAY_MS = 1000;
 
 /*
@@ -62,7 +62,7 @@ const fakeFlashOnce = async (myRun: number) => {
 
   for (let percent = 10; percent <= 100; percent += 10) {
     await sleep(300);
-    if (myRun !== run) return false;
+    if (myRun !== run) return false; // cancelled - fakeFlash logs it
     broadcast({ type: "flash_progress", percent });
   }
   return true;
@@ -75,20 +75,30 @@ const fakeFlash = async (myRun: number) => {
     broadcast({ type: "flash_start", attempt, maxAttempts: MAX_FLASH_ATTEMPTS });
 
     const ok = await fakeFlashOnce(myRun);
-    if (myRun !== run) return; // cancelled mid-flash
+    if (myRun !== run) {
+      console.log("Flash cancelled");
+      return;
+    }
 
     if (ok) {
+      console.log(`Flash succeeded on attempt ${attempt}/${MAX_FLASH_ATTEMPTS}`);
       broadcast({ type: "flash_result", success: true });
       stage = "idle";
       return;
     }
 
+    console.log(`Flash attempt ${attempt}/${MAX_FLASH_ATTEMPTS} failed: Failed to init device`);
+
     if (attempt < MAX_FLASH_ATTEMPTS) {
       await sleep(RETRY_DELAY_MS); // brief pause - the board stays in bootloader mode
-      if (myRun !== run) return; // cancelled while waiting to retry
+      if (myRun !== run) {
+        console.log("Flash cancelled");
+        return;
+      }
     }
   }
 
+  console.log(`Flash failed after ${MAX_FLASH_ATTEMPTS} attempts`);
   broadcast({
     type: "error",
     stage: "flash",
@@ -139,8 +149,15 @@ wss.on("connection", (socket) => {
   const id = crypto.randomUUID();
   console.log("TUI connected: ", id);
   socket.on("error", console.error);
-  socket.on("close", () => console.log("TUI disconnected"));
+  socket.on("close", () => {
+    console.log("TUI disconnected: ", id);
 
+    // Last client gone: forget the pipeline so the next connection starts fresh
+    if (wss.clients.size === 0) {
+      run++; // retire any work in progress - it stops at its next check
+      stage = "idle";
+    }
+  });
   socket.on("message", (raw) => {
     // A malformed message must not take the server down
     try {
@@ -152,3 +169,10 @@ wss.on("connection", (socket) => {
 });
 
 console.log(`Mock pipeline server listening on 127.0.0.1:${PORT}`);
+
+wss.on("error", (err: NodeJS.ErrnoException) => {
+  if (err.code === "EADDRINUSE")
+    console.error(`Port ${PORT} is already in use - is another server or an SSH tunnel running?`);
+  else console.error(err);
+  process.exit(1);
+});
