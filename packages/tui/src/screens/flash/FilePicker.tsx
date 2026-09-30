@@ -62,12 +62,6 @@ const FilePicker = () => {
   return (
     <Box {...styles.screenContainer}>
       <ScreenHeader title="Flash" subtitle="Select a .st to flash" />
-      {/* Result of the previous flash */}
-      {pipeline.stage === "done" && <Text {...styles.textSuccess}>Flashed successfully</Text>}
-      {pipeline.stage === "failed" && (
-        <Text {...styles.textDanger}>{pipeline.error?.message ?? "Something went wrong"}</Text>
-      )}
-
       <Box {...styles.filePickerContainer}>
         <Text {...styles.textMuted}>{FLASH_DIR}</Text>
 

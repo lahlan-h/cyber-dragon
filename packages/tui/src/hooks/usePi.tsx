@@ -79,6 +79,14 @@ export const PiProvider = ({ url, children }: PiProps) => {
   const [pipeline, dispatch] = useReducer(pipelineReducer, initialPipeline);
   const ws = useRef<WebSocket | null>(null);
 
+  // Turns notable server messages into notifications - each message fires once
+  const announce = (msg: ServerMessage) => {
+    if (msg.type === "flash_result")
+      notify(msg.success ? "Flashed successfully" : "Flash failed", msg.success ? "low" : "high");
+    if (msg.type === "build_result" && !msg.success) notify("Build failed - check the log", "high");
+    if (msg.type === "error") notify(msg.message, "high");
+  };
+
   useEffect(() => {
     if (!enabled) return; // disconnected on purpose - no socket
     let active = true; // is THIS socket still the current one?
@@ -100,7 +108,9 @@ export const PiProvider = ({ url, children }: PiProps) => {
     socket.onmessage = (event) => {
       if (!active) return; // retired connection, ignore.
       try {
-        dispatch(JSON.parse(event.data) as ServerMessage);
+        const msg = JSON.parse(event.data) as ServerMessage;
+        dispatch(msg);
+        announce(msg);
       } catch {}
     };
 
