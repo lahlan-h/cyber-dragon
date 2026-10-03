@@ -11,15 +11,6 @@ const MAX_FLASH_ATTEMPTS = 4;
 const MOCK_FLASH_FAIL_RATE = 0.25; // the real stm32flash fails about 1 in 4 - mimic it
 const RETRY_DELAY_MS = 1000;
 
-/*
-const FAKE_BUILD_LOG = [
-  "Processing fx3u_24_raw (platform: ststm32)",
-  "Compiling plc_prog.st ...",
-  "Linking firmware.elf",
-  "Building firmware.bin",
-];
-*/
-
 const FLASH_CHECKLIST = ["Power off board", "BOOT0 switch to bootloader (3.3V)", "Power on"];
 
 // One board, one pipeline: this state is shared by every connected client
@@ -50,7 +41,7 @@ const fakeBuild = async (myRun: number) => {
     broadcast({ type: "build_log", line });
   }
 
-  broadcast({ type: "build_result", success: true, firmware: "fx3u_24_raw", bytes: 26696 });
+  broadcast({ type: "build_result", success: true, firmware: "fx3u_24_raw", bytes: 86804 });
   stage = "awaiting_flash";
   broadcast({ type: "flash_prompt", checklist: FLASH_CHECKLIST });
 };
