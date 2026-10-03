@@ -12,7 +12,7 @@ import { VERSION } from "@/version";
 
 const App = () => {
   const { columns, rows } = useWindowSize();
-  const { navigate, focus } = useNavigation();
+  const { navigate } = useNavigation();
   const { exit } = useApp();
 
   const menuItems: MenuItem[] = [
@@ -27,7 +27,7 @@ const App = () => {
     <Box flexDirection="column" width={columns} height={rows}>
       <Header title="PiPLC Uploader" version={VERSION} />
       <Box flexDirection="row" flexGrow={1}>
-        <Menu items={menuItems} isActive={focus === "menu"} />
+        <Menu items={menuItems} />
         <Content />
       </Box>
 

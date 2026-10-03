@@ -12,13 +12,11 @@ export interface MenuItem {
 
 interface MenuProps {
   items: MenuItem[];
-  isActive: boolean;
 }
 
-const Menu = ({ items, isActive }: MenuProps) => {
+const Menu = ({ items }: MenuProps) => {
   const styles = useStyles("component");
   const { colors } = useTheme();
-
   const { screen, focus } = useNavigation();
   const isFocused = focus === "menu";
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -30,13 +28,13 @@ const Menu = ({ items, isActive }: MenuProps) => {
       if (key.return) items[selectedIndex].onSelect();
       if (key.rightArrow && items[selectedIndex].screen) items[selectedIndex].onSelect();
     },
-    { isActive },
+    { isActive: isFocused },
   );
 
   return (
     <Box {...styles.menu} borderColor={isFocused ? colors.accent : colors.border}>
       {items.map((item, index) => {
-        const isCursor = isActive && index === selectedIndex; // cursor only shows while the menu has the keyboard
+        const isCursor = isFocused && index === selectedIndex; // cursor only shows while the menu has the keyboard
         const isOpen = item.screen === screen; // the screen currently on display
 
         return (
