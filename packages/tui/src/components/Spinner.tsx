@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { Text } from "ink";
 
-const frames = ["◐", "◓", "◑", "◒"];
+const FRAMES = { circle: ["◐", "◓", "◑", "◒"], dots: [".", "..", "..."] } as const;
 
-const Spinner = () => {
+interface SpinnerProps {
+  variant?: keyof typeof FRAMES;
+}
+
+const Spinner = ({ variant = "circle" }: SpinnerProps) => {
+  const frames = FRAMES[variant];
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {

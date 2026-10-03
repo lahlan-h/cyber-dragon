@@ -5,7 +5,7 @@ import { usePi } from "@/hooks/usePi";
 import { useStyles, useTheme } from "@/hooks/useTheme";
 
 import ScreenHeader from "@/components/ScreenHeader";
-import DotsSpinner from "@/components/DotsSpinner";
+import Spinner from "@/components/Spinner";
 
 const BuildLog = () => {
   const styles = useStyles("component");
@@ -32,7 +32,7 @@ const BuildLog = () => {
         subtitle={
           <>
             Building
-            <DotsSpinner />
+            <Spinner variant="dots" />
           </>
         }
       />
