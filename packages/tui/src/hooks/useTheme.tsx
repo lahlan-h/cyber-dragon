@@ -1,6 +1,5 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
-import { createHomeStyles } from "@/styles/home.styles";
 import { createComponentStyles } from "@/styles/component.styles";
 
 // Due to dark and light mode being handled by ink / the native terminal, instead
@@ -8,7 +7,7 @@ import { createComponentStyles } from "@/styles/component.styles";
 
 interface ThemeContextType {
   theme: ThemeName;
-  changeTheme: (theme: ThemeName) => void;
+  changeTheme: (theme: ThemeName) => void; // for the config feature (planned)
   colors: ColorScheme;
   styles: BuiltStyles;
   cycleTheme: (direction: 1 | -1) => void;
@@ -70,7 +69,7 @@ const themes = {
 } satisfies Record<string, ColorScheme>;
 
 // Helper types for theme names and validation
-type ThemeName = keyof typeof themes; // "classic" | "cyber"
+type ThemeName = keyof typeof themes;
 const themeNames = Object.keys(themes) as ThemeName[]; // handy for cycling / pickers
 
 // To add a stylesheet:
@@ -78,12 +77,11 @@ const themeNames = Object.keys(themes) as ThemeName[]; // handy for cycling / pi
 // 2. Import it at the top
 // 3. Then register it here.
 const styleMap = {
-  home: createHomeStyles,
   component: createComponentStyles,
 } as const;
 
 // Helper types for stylesheets
-type StyleName = keyof typeof styleMap; // "home"
+type StyleName = keyof typeof styleMap;
 type BuiltStyles = {
   [K in StyleName]: ReturnType<(typeof styleMap)[K]>;
 };
