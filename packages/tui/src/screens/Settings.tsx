@@ -14,7 +14,7 @@ import ConnectionStatus from "@/components/ConnectionStatus";
 import { FLASH_DIR, PI_URL } from "@/config/config";
 
 const ROWS = ["reconnect", "disconnect", "theme"] as const; // only interactive rows, do not include rows you want cursor to skip
-type Row = (typeof ROWS)[number]; // turns the list into a type: "reconnect" | "theme"
+type Row = (typeof ROWS)[number]; // turns the list into a type: i.e., "reconnect" | "theme"
 
 const Settings = () => {
   const styles = useStyles("component");

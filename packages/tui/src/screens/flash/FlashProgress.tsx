@@ -6,7 +6,7 @@ import { useNavigation } from "@/hooks/useNavigation";
 
 import ScreenHeader from "@/components/ScreenHeader";
 import ProgressBar from "@/components/ProgressBar";
-import DotsSpinner from "@/components/DotsSpinner";
+import Spinner from "@/components/Spinner";
 
 const FlashProgress = () => {
   const styles = useStyles("component");
@@ -33,7 +33,7 @@ const FlashProgress = () => {
         subtitle={
           <>
             Writing to the board
-            <DotsSpinner />
+            <Spinner variant="dots" />
           </>
         }
       />
