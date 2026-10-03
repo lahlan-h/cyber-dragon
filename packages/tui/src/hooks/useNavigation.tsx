@@ -9,7 +9,6 @@ interface NavigationContextType {
   focus: Pane; // which pane has the keyboard
   navigate: (screen: Screen) => void;
   focusMenu: () => void;
-  back: () => void;
 }
 
 interface NavigationProps {
@@ -20,19 +19,16 @@ const NavigationContext = createContext<NavigationContextType | undefined>(undef
 
 // hook owns "where the user is", what screen is open, an which pane has the keyboard
 export const NavigationProvider = ({ children }: NavigationProps) => {
-  const [history, setHistory] = useState<Screen[]>(["home"]); // start on home screen ...
+  const [screen, setScreen] = useState<Screen>("home"); // start on home screen ...
   const [focus, setFocus] = useState<Pane>("menu"); // start on the menu
 
-  const screen = history[history.length - 1];
-
   // Opening a screen hands the keyboard to it
-  const navigate = (next: Screen) => {
-    setHistory((h) => [...h, next]);
+  const navigate = (screen: Screen) => {
+    setScreen(screen);
     setFocus("content");
   };
 
   const focusMenu = () => setFocus("menu");
-  const back = () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h));
 
   // Esc = the universial back to menu key
   useInput((input, key) => {
@@ -40,7 +36,7 @@ export const NavigationProvider = ({ children }: NavigationProps) => {
   });
 
   return (
-    <NavigationContext.Provider value={{ screen, focus, navigate, focusMenu, back }}>
+    <NavigationContext.Provider value={{ screen, focus, navigate, focusMenu }}>
       {children}
     </NavigationContext.Provider>
   );
