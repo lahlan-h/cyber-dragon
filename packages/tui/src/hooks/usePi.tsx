@@ -1,5 +1,12 @@
-// prettier-ignore
-import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode, } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import type { ClientMessage, ServerMessage, Step } from "@cyber-dragon/shared";
 
 import { useNotification } from "./useNotification";
@@ -19,7 +26,7 @@ export type PipelineStage =
 interface PiContextType {
   status: PiConnectionType;
   pipeline: PipelineState;
-  send: (msg: ClientMessage) => boolean;
+
   upload: (filename: string, content: string) => boolean;
   reconnect: () => void;
   disconnect: () => void;
@@ -167,7 +174,7 @@ export const PiProvider = ({ url, children }: PiProps) => {
 
   return (
     <PiContext.Provider
-      value={{ status, pipeline, send, upload, reconnect, disconnect, cancel, startFlash }}
+      value={{ status, pipeline, upload, reconnect, disconnect, cancel, startFlash }}
     >
       {children}
     </PiContext.Provider>
