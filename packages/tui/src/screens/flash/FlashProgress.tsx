@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Text, Box, measureElement, useWindowSize, useInput, type DOMElement } from "ink";
+import { Text, Box, useInput } from "ink";
 
 import { usePi } from "@/hooks/usePi";
 import { useStyles, useTheme } from "@/hooks/useTheme";

@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 
 import { createHomeStyles } from "@/styles/home.styles";
 import { createComponentStyles } from "@/styles/component.styles";
@@ -72,7 +72,6 @@ const themes = {
 // Helper types for theme names and validation
 type ThemeName = keyof typeof themes; // "classic" | "cyber"
 const themeNames = Object.keys(themes) as ThemeName[]; // handy for cycling / pickers
-const isThemeName = (value: string): value is ThemeName => Object.hasOwn(themes, value);
 
 // To add a stylesheet:
 // 1. Create createXStyles in x.styles.ts

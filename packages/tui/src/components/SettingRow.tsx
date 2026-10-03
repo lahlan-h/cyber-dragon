@@ -1,4 +1,4 @@
-import React, { type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Text, Box } from "ink";
 
 import { useTheme, useStyles } from "@/hooks/useTheme";

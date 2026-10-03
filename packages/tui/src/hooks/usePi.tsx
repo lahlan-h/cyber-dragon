@@ -1,5 +1,5 @@
 // prettier-ignore
-import React, { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode, } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef, useState, type ReactNode, } from "react";
 import type { ClientMessage, ServerMessage, Step } from "@cyber-dragon/shared";
 
 import { useNotification } from "./useNotification";

@@ -1,7 +1,7 @@
-import React, { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Text, Box } from "ink";
 
-import { useTheme, useStyles } from "@/hooks/useTheme";
+import { useStyles } from "@/hooks/useTheme";
 
 interface ScreenHeader {
   title: string;
@@ -10,7 +10,6 @@ interface ScreenHeader {
 
 const ScreenHeader = ({ title, subtitle }: ScreenHeader) => {
   const styles = useStyles("component");
-  const { colors } = useTheme();
 
   return (
     <Box {...styles.screenHeader}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Box, useInput } from "ink";
 
 import { useNotification } from "@/hooks/useNotification";

@@ -1,4 +1,3 @@
-import React from "react";
 import { Text, Box, useInput } from "ink";
 
 import { useStyles } from "@/hooks/useTheme";

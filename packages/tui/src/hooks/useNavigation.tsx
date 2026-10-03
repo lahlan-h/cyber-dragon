@@ -1,5 +1,5 @@
 import { useInput } from "ink";
-import React, { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 export type Screen = "home" | "flash" | "restore" | "settings";
 export type Pane = "menu" | "content";

@@ -1,8 +1,7 @@
-import React from "react";
 import { Box, useWindowSize, useApp } from "ink";
 
 // Custom Hooks
-import { useNavigation, type Screen } from "@/hooks/useNavigation";
+import { useNavigation } from "@/hooks/useNavigation";
 
 // Custom Components / Styles / Helpers
 import Menu, { type MenuItem } from "@/components/Menu";

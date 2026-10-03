@@ -1,5 +1,5 @@
-import React, { ComponentType } from "react";
-import { Text, Box } from "ink";
+import { ComponentType } from "react";
+import { Box } from "ink";
 
 // Screens
 import Home from "@/screens/Home";

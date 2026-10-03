@@ -1,6 +1,3 @@
-import React from "react";
-import { Text, Box } from "ink";
-
 import { usePi } from "@/hooks/usePi";
 
 import BuildLog from "./BuildLog";

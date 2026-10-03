@@ -12,6 +12,7 @@
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "types": ["node"],
+    "noUnusedLocals": true,
 
     // tsx runs your code directly, so TypeScript only checks types
     "noEmit": true,

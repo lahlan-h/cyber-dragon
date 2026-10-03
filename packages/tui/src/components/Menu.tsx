@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Text, Box, useInput } from "ink";
 
 import { useStyles, useTheme } from "@/hooks/useTheme";
@@ -19,7 +19,7 @@ const Menu = ({ items, isActive }: MenuProps) => {
   const styles = useStyles("component");
   const { colors } = useTheme();
 
-  const { screen, focus, focusMenu } = useNavigation();
+  const { screen, focus } = useNavigation();
   const isFocused = focus === "menu";
   const [selectedIndex, setSelectedIndex] = useState(0);
 

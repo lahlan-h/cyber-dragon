@@ -1,5 +1,4 @@
-import React from "react";
-import { Text, Box, useInput } from "ink";
+import { Box, useInput } from "ink";
 
 import { useNavigation } from "@/hooks/useNavigation";
 import { useStyles } from "@/hooks/useTheme";

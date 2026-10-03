@@ -1,5 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, Box, useInput } from "ink";
 import { join } from "node:path";
 
@@ -16,7 +16,7 @@ const FilePicker = () => {
   const styles = useStyles("component");
   const { colors } = useTheme();
   const { notify } = useNotification();
-  const { status, pipeline, upload } = usePi();
+  const { status, upload } = usePi();
   const { focus, focusMenu } = useNavigation();
   const [files, setFiles] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);

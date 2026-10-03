@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, Box, measureElement, useWindowSize, type DOMElement } from "ink";
 
 import { usePi } from "@/hooks/usePi";
