@@ -1,8 +1,7 @@
 import React from "react";
 import { Text, Box } from "ink";
 
-import { useTheme, useStyles } from "@/hooks/useTheme";
-import { usePi } from "@/hooks/usePi";
+import { useStyles } from "@/hooks/useTheme";
 
 import ConnectionStatus from "./ConnectionStatus";
 
@@ -13,13 +12,11 @@ interface HeaderProps {
 
 const Header = ({ title, version }: HeaderProps) => {
   const styles = useStyles("component");
-  const { colors } = useTheme();
-  const { status } = usePi();
 
   return (
     <Box {...styles.bar}>
       <Box {...styles.barLeft}>
-        <Text {...styles.barText}>{version === undefined ? "" : version}</Text>
+        <Text {...styles.barText}>{version}</Text>
       </Box>
       <Box {...styles.barCenter}>
         <Text {...styles.barText}>{title}</Text>

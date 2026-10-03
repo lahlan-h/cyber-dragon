@@ -8,7 +8,8 @@ interface ProgressBarProps {
   width?: number; // in characters - leave out to fill the available space
 }
 
-const LABEL_WIDTH = 5; // " 100%" - the percentage takes this much of the row
+const LABEL_WIDTH = 5;
+
 const ProgressBar = ({ percent, width }: ProgressBarProps) => {
   const styles = useStyles("component");
   const { columns } = useWindowSize(); // changes when the terminal is resized
@@ -19,7 +20,7 @@ const ProgressBar = ({ percent, width }: ProgressBarProps) => {
   useEffect(() => {
     if (barRef.current === null) return;
     const { width: available } = measureElement(barRef.current);
-    setMeasuredWidth(Math.max(1, available) - 5);
+    setMeasuredWidth(Math.max(1, available - LABEL_WIDTH));
   }, [columns]);
 
   const barWidth = width ?? measuredWidth; // a fixed width wins if one is given

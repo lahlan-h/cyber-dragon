@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, useWindowSize, useApp, useInput } from "ink";
+import { Box, useWindowSize, useApp } from "ink";
 
 // Custom Hooks
 import { useNavigation, type Screen } from "@/hooks/useNavigation";
@@ -26,7 +26,7 @@ const App = () => {
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
-      <Header title="cyber-dragon" version={VERSION} />
+      <Header title="PiPLC Uploader" version={VERSION} />
       <Box flexDirection="row" flexGrow={1}>
         <Menu items={menuItems} isActive={focus === "menu"} />
         <Content />

@@ -8,7 +8,7 @@ type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
 const PORT = 3000;
 const MAX_FLASH_ATTEMPTS = 4;
-const MOCK_FLASH_FAIL_RATE = 0.95; // the real stm32flash fails about 1 in 4 - mimic it
+const MOCK_FLASH_FAIL_RATE = 0.25; // the real stm32flash fails about 1 in 4 - mimic it
 const RETRY_DELAY_MS = 1000;
 
 /*

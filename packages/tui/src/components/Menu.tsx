@@ -27,7 +27,8 @@ const Menu = ({ items, isActive }: MenuProps) => {
     (input, key) => {
       if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
       if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
-      if (key.return || key.rightArrow) items[selectedIndex].onSelect();
+      if (key.return) items[selectedIndex].onSelect();
+      if (key.rightArrow && items[selectedIndex].screen) items[selectedIndex].onSelect();
     },
     { isActive },
   );
