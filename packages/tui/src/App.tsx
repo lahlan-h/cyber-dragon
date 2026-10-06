@@ -1,29 +1,37 @@
-import React, { useState, useEffect } from "react";
-import { Text, Box, useWindowSize } from "ink";
+import { Box, useWindowSize, useApp } from "ink";
 
-import Menu from "@/components/Menu";
-import { usePi } from "@/hooks/usePi";
+// Custom Hooks
+import { useNavigation } from "@/hooks/useNavigation";
 
-const THEME = "DarkGray";
-const MENU_ITEMS = ["Flash", "Restore", "Upload", "Reconnect", "Exit"];
-const CONTROLS = "↑/↓ navigate • enter select • esc quit";
+// Custom Components / Styles / Helpers
+import Menu, { type MenuItem } from "@/components/Menu";
+import Content from "@/components/Content";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { VERSION } from "@/version";
 
 const App = () => {
   const { columns, rows } = useWindowSize();
-  const { status } = usePi();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [focus, setFocus] = useState("main-menu");
+  const { navigate } = useNavigation();
+  const { exit } = useApp();
+
+  const menuItems: MenuItem[] = [
+    { label: "Home", screen: "home", onSelect: () => navigate("home") },
+    { label: "Flash", screen: "flash", onSelect: () => navigate("flash") },
+    { label: "Restore", screen: "restore", onSelect: () => navigate("restore") },
+    { label: "Settings", screen: "settings", onSelect: () => navigate("settings") },
+    { label: "Exit", onSelect: exit }, // an action, so no screen
+  ];
 
   return (
     <Box flexDirection="column" width={columns} height={rows}>
-      <Text>cyber-dragon status: {status}</Text>
-      <Menu
-        theme={THEME}
-        items={MENU_ITEMS}
-        selectedIndex={selectedIndex}
-        setSelectedIndex={setSelectedIndex}
-        isActive={focus === "main-menu"}
-      />
+      <Header title="PiPLC Uploader" version={VERSION} />
+      <Box flexDirection="row" flexGrow={1}>
+        <Menu items={menuItems} />
+        <Content />
+      </Box>
+
+      <Footer />
     </Box>
   );
 };

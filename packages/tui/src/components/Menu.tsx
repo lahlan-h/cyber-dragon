@@ -1,39 +1,54 @@
-import React from "react";
-import { Text, Box, useInput, useApp } from "ink";
-import { usePi } from "../hooks/usePi";
+import { useState } from "react";
+import { Text, Box, useInput } from "ink";
 
-interface MenuProps {
-  theme: string;
-  menuWidth?: number;
-  items: string[];
-  selectedIndex: number;
-  setSelectedIndex: (index: number) => void;
-  isActive: boolean;
-  onSelect?: () => void;
+import { useStyles, useTheme } from "@/hooks/useTheme";
+import { useNavigation, type Screen } from "@/hooks/useNavigation";
+
+export interface MenuItem {
+  label: string;
+  onSelect: () => void;
+  screen?: Screen; // set for items that open a screen; actions like Exit leave it out
 }
 
-const Menu = ({ theme, menuWidth, items, selectedIndex, setSelectedIndex, isActive }: MenuProps) => {
-  const { exit } = useApp(); // Provides direct access to the command-line application (i.e., input)
-  const { send } = usePi();
+interface MenuProps {
+  items: MenuItem[];
+}
+
+const Menu = ({ items }: MenuProps) => {
+  const styles = useStyles("component");
+  const { colors } = useTheme();
+  const { screen, focus } = useNavigation();
+  const isFocused = focus === "menu";
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   useInput(
     (input, key) => {
-      if (key.upArrow) setSelectedIndex((selectedIndex - 1 + items.length) % items.length);
-      if (key.downArrow) setSelectedIndex((selectedIndex + 1 + items.length) % items.length);
-      if (key.return) send("hello world!");
-      if (key.escape) exit();
+      if (key.upArrow) setSelectedIndex((i) => (i - 1 + items.length) % items.length);
+      if (key.downArrow) setSelectedIndex((i) => (i + 1) % items.length);
+      if (key.return) items[selectedIndex].onSelect();
+      if (key.rightArrow && items[selectedIndex].screen) items[selectedIndex].onSelect();
     },
-    { isActive },
+    { isActive: isFocused },
   );
 
   return (
-    <Box flexDirection="column">
-      {items.map((item, index) => (
-        <Text color={index === selectedIndex ? "green" : undefined} key={index}>
-          {index === selectedIndex ? ">" : ""}
-          {items[index]}
-        </Text>
-      ))}
+    <Box {...styles.menu} borderColor={isFocused ? colors.accent : colors.border}>
+      {items.map((item, index) => {
+        const isCursor = isFocused && index === selectedIndex; // cursor only shows while the menu has the keyboard
+        const isOpen = item.screen === screen; // the screen currently on display
+
+        return (
+          <Text
+            key={item.label}
+            {...(isCursor ? styles.menuItemSelected : styles.menuItem)}
+            bold={isOpen}
+          >
+            {isCursor ? "❯ " : "  "}
+            {item.label}
+            {isOpen ? " •" : ""}
+          </Text>
+        );
+      })}
     </Box>
   );
 };

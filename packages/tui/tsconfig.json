@@ -8,8 +8,10 @@
     "strict": true, // full type checking
     "skipLibCheck": true, // don't type-check node_modules
     "isolatedModules": true, // flag code tsx can't compile one file at a time
-    "esModuleInterop": true, // allows `import React from "react"`
-    "allowImportingTsExtensions": true,
+    "esModuleInterop": true, // allows default imports from CommonJS packages
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "noUnusedLocals": true,
 
     // tsx runs your code directly, so TypeScript only checks types
     "noEmit": true,
