@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "noEmit": true,
     "types": ["node"],
-    "noUnusedLocals": true
+    "noUnusedLocals": false
   },
   "include": ["src"]
 }
