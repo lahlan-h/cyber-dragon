@@ -1,16 +1,15 @@
 import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, ServerMessage } from "@cyber-dragon/shared";
-import { FAKE_BUILD_LOG } from "./fakeBuildLog";
 
 type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
 const HOST = process.env.HOST ?? "127.0.0.1";
 const PORT = Number(process.env.PORT ?? 3000);
-const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL";
+const TEST_FIRMWARE = process.env.TEST_FIRMWARE ?? "/flash-files/test.bin";
+const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL"; // used by the real flash in Step 4
 
 const MAX_FLASH_ATTEMPTS = 4;
 const RETRY_DELAY_MS = 1000;
-const MOCK_FLASH_FAIL_RATE = 0.25;
 
 const FLASH_CHECKLIST = ["Power off board", "BOOT0 switch to bootloader (3.3V)", "Power on"];
 
@@ -19,6 +18,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 interface Firmware {
   name: string;
   bytes: number;
+  path: string;
 }
 
 interface Tools {
@@ -27,61 +27,24 @@ interface Tools {
     onLog: (line: string) => void,
     signal: AbortSignal,
   ): Promise<Firmware | null>;
-  flash(onProgress: (percent: number) => void, signal: AbortSignal): Promise<boolean>;
+  flash(
+    firmware: Firmware,
+    onProgress: (percent: number) => void,
+    signal: AbortSignal,
+  ): Promise<boolean>;
 }
 
-const mockTools: Tools = {
-  async build(program, onLog, signal) {
-    if (!program.trim()) {
-      onLog("error: the program is empty");
-      return null;
-    }
-
-    for (const line of FAKE_BUILD_LOG) {
-      await sleep(10);
-      if (signal.aborted) return null;
-      onLog(line);
-    }
-    return { name: "fx3u_24_raw", bytes: 86804 };
-  },
-
-  async flash(onProgress, signal) {
-    await sleep(500);
-    if (Math.random() < MOCK_FLASH_FAIL_RATE) return false;
-
-    for (let percent = 10; percent <= 100; percent += 10) {
-      await sleep(300);
-      if (signal.aborted) return false;
-      onProgress(percent);
-    }
-    return true;
-  },
-};
-
 const realTools: Tools = {
-  async build(program, onLog, signal) {
-    if (!program.trim()) {
-      onLog("error: the program is empty");
-      return null;
-    }
-
-    for (const line of FAKE_BUILD_LOG) {
-      await sleep(10);
-      if (signal.aborted) return null;
-      onLog(line);
-    }
-    return { name: "fx3u_24_raw", bytes: 86804 };
+  // TEMPORARY: skip building and hand over a known-good file, so flashing can be done first
+  async build(_program, onLog, _signal) {
+    onLog(`Skipping build - using ${TEST_FIRMWARE}`);
+    return { name: "test", bytes: 0, path: TEST_FIRMWARE };
   },
 
-  async flash(onProgress, signal) {
-    await sleep(500);
-    if (Math.random() < MOCK_FLASH_FAIL_RATE) return false;
-
-    for (let percent = 10; percent <= 100; percent += 10) {
-      await sleep(300);
-      if (signal.aborted) return false;
-      onProgress(percent);
-    }
+  // TEMPORARY: pretend to flash - the real stm32flash call replaces this in Step 4
+  async flash(firmware, onProgress, _signal) {
+    console.log("Would flash:", firmware.path);
+    onProgress(100);
     return true;
   },
 };
@@ -90,6 +53,7 @@ const realTools: Tools = {
 class Pipeline {
   private stage: ServerStage = "idle";
   private run = new AbortController();
+  private firmware: Firmware | null = null; // The last good build, waiting to be flashed
 
   constructor(
     private tools: Tools,
@@ -106,7 +70,9 @@ class Pipeline {
   }
 
   flash() {
-    if (this.stage === "awaiting_flash") this.flashWithRetries(this.run.signal);
+    if (this.stage === "awaiting_flash" && this.firmware) {
+      this.flashWithRetries(this.firmware, this.run.signal);
+    }
   }
 
   cancel() {
@@ -134,6 +100,7 @@ class Pipeline {
       return this.send({ type: "error", stage: "build", message: "Build failed - check the log" });
     }
 
+    this.firmware = firmware;
     this.send({
       type: "build_result",
       success: true,
@@ -143,7 +110,7 @@ class Pipeline {
     this.promptFlash();
   }
 
-  private async flashWithRetries(signal: AbortSignal) {
+  private async flashWithRetries(firmware: Firmware, signal: AbortSignal) {
     this.stage = "flashing";
     const onProgress = (percent: number) => this.send({ type: "flash_progress", percent });
 
@@ -152,7 +119,7 @@ class Pipeline {
       if (signal.aborted) return;
 
       this.send({ type: "flash_start", attempt, maxAttempts: MAX_FLASH_ATTEMPTS });
-      const flashed = await this.tools.flash(onProgress, signal);
+      const flashed = await this.tools.flash(firmware, onProgress, signal);
       if (signal.aborted) return;
 
       if (flashed) {
@@ -185,8 +152,7 @@ const broadcast = (msg: ServerMessage) => {
   }
 };
 
-// Swap for realTools (iec2c/pio + stm32flash) later
-const pipeline = new Pipeline(mockTools, broadcast);
+const pipeline = new Pipeline(realTools, broadcast);
 
 const handle = (msg: ClientMessage) => {
   if (msg.type === "upload") pipeline.upload(msg.filename, msg.content);
