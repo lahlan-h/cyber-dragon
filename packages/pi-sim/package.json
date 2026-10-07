@@ -6,7 +6,7 @@
   "scripts": {
     "start": "concurrently -k -n bridge,server \"npm run bridge\" \"npm run server\"",
     "bridge": "BRIDGE_HOST=0.0.0.0 node src/index.js",
-    "server": "docker run --rm --init -p 3000:3000 --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
+    "server": "docker run --rm --init --name cyber-dragon-pi -p 3000:3000 --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
     "build": "docker build -t cyber-dragon-pi --build-arg CACHEBUST=$(date +%s) ../..",
     "shell": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi bash",
     "info": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi stm32flash -m 8n1 /dev/ttyVIRTUAL",
