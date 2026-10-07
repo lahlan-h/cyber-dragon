@@ -30,7 +30,10 @@ RUN ARCH_SUFFIX="" \
  && cp iec2c "/app/firmware/openplc-uploader/lib/matiec/bin/iec2c${ARCH_SUFFIX}" \
  && rm -rf /tmp/matiec-src
 
-# Install server dependencies 
+# Prime PlatformIO once, here, instead of making every fresh container redo
+RUN cd /app/firmware/openplc-uploader && /opt/venv/bin/pio run -e fx3u_24_raw
+
+# Install server dependencies
 RUN npm ci --workspace @cyber-dragon/server
 
 # Give the script executable permissions
@@ -42,7 +45,8 @@ ENV SERIAL_PORT=/dev/ttyVIRTUAL \
     HOST=0.0.0.0 \
     PORT=3000 \
     PIO_BIN=/opt/venv/bin/pio \
-    PROJECT_DIR=/app/firmware/openplc-uploader
+    PROJECT_DIR=/app/firmware/openplc-uploader \
+    SERIAL_MODE=8e1
 
 # When this container is created run this script before anything else
 ENTRYPOINT ["/app/docker/entrypoint.sh"]

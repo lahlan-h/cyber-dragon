@@ -9,6 +9,7 @@ type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 const HOST = process.env.HOST ?? "127.0.0.1";
 const PORT = Number(process.env.PORT ?? 3000);
 const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL"; // used by the real flash next
+const SERIAL_MODE = process.env.SERIAL_MODE ?? "8e1";
 const PROJECT_DIR = process.env.PROJECT_DIR ?? "/app/firmware/openplc-uploader";
 const PIO_BIN = process.env.PIO_BIN ?? "/opt/venv/bin/pio";
 
@@ -86,11 +87,23 @@ const realTools: Tools = {
     }
   },
 
-  // TEMPORARY: pretend to flash - the real stm32flash call replaces this next
-  async flash(firmware, onProgress, _signal) {
-    console.log("Would flash:", firmware.path);
-    onProgress(100);
-    return true;
+  async flash(firmware, onProgress, signal) {
+    let lastPercent = -1;
+
+    // stm32flash prints "Wrote and verified address 0x08000100 (0.29%)" as it goes
+    const onLine = (line: string) => {
+      const match = line.match(/\((\d+)(?:\.\d+)?%\)/);
+      if (!match) return console.log(line); // anything else, e.g. "Failed to init device"
+
+      const percent = Number(match[1]);
+      if (percent === lastPercent) return; // it reports every 256 bytes - only send changes
+      lastPercent = percent;
+      onProgress(percent);
+    };
+
+    const args = ["-m", SERIAL_MODE, "-w", firmware.path, "-v", SERIAL_PORT];
+    const code = await runCommand("stm32flash", args, PROJECT_DIR, onLine, signal);
+    return code === 0;
   },
 };
 
