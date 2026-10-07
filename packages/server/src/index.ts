@@ -6,7 +6,9 @@ import { FAKE_BUILD_LOG } from "./fakeBuildLog";
 
 type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
-const PORT = 3000;
+const HOST = process.env.HOST ?? "127.0.0.1";
+const PORT = Number(process.env.PORT) ?? 3000;
+
 const MAX_FLASH_ATTEMPTS = 4;
 const MOCK_FLASH_FAIL_RATE = 0.25; // the real stm32flash fails about 1 in 4 - mimic it
 const RETRY_DELAY_MS = 1000;
@@ -18,7 +20,7 @@ let stage: ServerStage = "idle";
 
 let run = 0; // bumped on every new upload or cancel - older runs notice and stop
 
-const wss = new WebSocketServer({ host: "127.0.0.1", port: PORT });
+const wss = new WebSocketServer({ host: HOST, port: PORT });
 
 // Typed send: every outgoing message is checked against the shared protocol
 const broadcast = (msg: ServerMessage) => {
