@@ -63,3 +63,7 @@ const server = net.createServer({ allowHalfOpen: true }, (socket) => {
   });
   socket.on("error", () => {});
 });
+
+server.listen(tcpPortNumber, HOST, () =>
+  console.log(ts(), `Bridge listening on ${HOST}:${tcpPortNumber}`),
+);
