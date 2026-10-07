@@ -4,3 +4,6 @@ TODO.md
 packages/bridge/scripts
 .pio/
 .DS_Store
+
+# firmware/openplc-uploader build cache (source + iec2c binaries ARE committed)
+.core_dir/

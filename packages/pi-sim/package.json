@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "concurrently -k -n bridge,server \"npm run bridge:node\" \"npm run server\"",
+    "start": "trap 'docker rm -f cyber-dragon-pi >/dev/null 2>&1' EXIT INT TERM; concurrently -k -n bridge,server \"npm run bridge:node\" \"npm run server\"",
     "bridge:node": "BRIDGE_HOST=0.0.0.0 node src/index.js",
-    "bridge:bash": "socat -d -d TCP-LISTEN:5050,reuseaddr,fork /dev/cu.PL2303G-USBtoUART10,raw,echo=0,ispeed=57600,ospeed=57600,cs8,parenb=1,parodd=0,cstopb=0",
-    "server": "docker rm -f cyber-dragon-pi >/dev/null 2>&1; docker run --rm --init --name cyber-dragon-pi -p 3000:3000 -v \"$PWD/firmware:/firmware\" --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
-    "stop": "docker stop cyber-dragon-pi",
+    "bridge:socat": "socat -d -d TCP-LISTEN:5050,reuseaddr,fork /dev/cu.PL2303G-USBtoUART10,raw,echo=0,ispeed=57600,ospeed=57600,cs8,parenb=1,parodd=0,cstopb=0",
+    "server": "docker rm -f cyber-dragon-pi >/dev/null 2>&1; exec docker run --rm --init --name cyber-dragon-pi -p 3000:3000 --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
+    "stop": "docker rm -f cyber-dragon-pi",
     "build": "docker build -t cyber-dragon-pi --build-arg CACHEBUST=$(date +%s) ../..",
-    "shell": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi bash",
-    "info": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi stm32flash -m 8n1 /dev/ttyVIRTUAL",
+    "shell": "docker exec -it cyber-dragon-pi bash",
+    "info": "docker exec -it cyber-dragon-pi stm32flash -m 8n1 /dev/ttyVIRTUAL",
     "probe": "node scripts/probe.js"
   },
   "dependencies": {
