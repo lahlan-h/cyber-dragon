@@ -1,3 +1,6 @@
+import { spawn } from "node:child_process";
+import { stat, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, ServerMessage } from "@cyber-dragon/shared";
 
@@ -5,8 +8,13 @@ type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
 const HOST = process.env.HOST ?? "127.0.0.1";
 const PORT = Number(process.env.PORT ?? 3000);
-const TEST_FIRMWARE = process.env.TEST_FIRMWARE ?? "/flash-files/test.bin";
-const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL"; // used by the real flash in Step 4
+const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL"; // used by the real flash next
+const PROJECT_DIR = process.env.PROJECT_DIR ?? "/app/firmware/openplc-uploader";
+const PIO_BIN = process.env.PIO_BIN ?? "/opt/venv/bin/pio";
+
+const PIO_ENV = "fx3u_24_raw";
+const PROGRAM_PATH = path.join(PROJECT_DIR, "plc_prog.st"); // script.py runs iec2c on this
+const FIRMWARE_PATH = path.join(PROJECT_DIR, ".pio/build", PIO_ENV, "firmware.bin");
 
 const MAX_FLASH_ATTEMPTS = 4;
 const RETRY_DELAY_MS = 1000;
@@ -34,14 +42,51 @@ interface Tools {
   ): Promise<boolean>;
 }
 
+// Runs a command and sends each line of its output to onLine. Resolves with the exit code
+// (null if it couldn't start or was aborted). Splits on \r too - stm32flash uses it for progress
+const runCommand = (
+  cmd: string,
+  args: string[],
+  cwd: string,
+  onLine: (line: string) => void,
+  signal: AbortSignal,
+) =>
+  new Promise<number | null>((resolve) => {
+    const proc = spawn(cmd, args, { cwd, signal }); // abort() kills it
+
+    const forwardLines = (chunk: Buffer) => {
+      for (const line of chunk.toString().split(/[\r\n]+/)) {
+        if (line.trim()) onLine(line);
+      }
+    };
+    proc.stdout.on("data", forwardLines);
+    proc.stderr.on("data", forwardLines);
+
+    proc.on("error", () => resolve(null));
+    proc.on("close", (code) => resolve(code));
+  });
+
 const realTools: Tools = {
-  // TEMPORARY: skip building and hand over a known-good file, so flashing can be done first
-  async build(_program, onLog, _signal) {
-    onLog(`Skipping build - using ${TEST_FIRMWARE}`);
-    return { name: "test", bytes: 0, path: TEST_FIRMWARE };
+  async build(program, onLog, signal) {
+    if (!program.trim()) {
+      onLog("error: the program is empty");
+      return null;
+    }
+
+    try {
+      await writeFile(PROGRAM_PATH, program, "utf8");
+      const code = await runCommand(PIO_BIN, ["run", "-e", PIO_ENV], PROJECT_DIR, onLog, signal);
+      if (code !== 0) return null;
+
+      const { size } = await stat(FIRMWARE_PATH);
+      return { name: PIO_ENV, bytes: size, path: FIRMWARE_PATH };
+    } catch (err) {
+      onLog(`error: ${(err as Error).message}`); // e.g. PROJECT_DIR doesn't exist
+      return null;
+    }
   },
 
-  // TEMPORARY: pretend to flash - the real stm32flash call replaces this in Step 4
+  // TEMPORARY: pretend to flash - the real stm32flash call replaces this next
   async flash(firmware, onProgress, _signal) {
     console.log("Would flash:", firmware.path);
     onProgress(100);
