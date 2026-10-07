@@ -3,7 +3,7 @@ import net from "node:net";
 import { SerialPort } from "serialport";
 
 // 1. Settings for the command line: npm run dev -w @cyber-dragon/pi-sim -- /dev/cu.PL2303G-USBtoUART210 5050
-const [portPath = "/dev/cu.PL2303G-USBtoUART210", tcpPort = "5050"] = process.argv.slice(2);
+const [portPath = " /dev/cu.PL2303G-USBtoUART10", tcpPort = "5050"] = process.argv.slice(2);
 
 // Check the TCP port is a valid number
 const tcpPortNumber = Number(tcpPort);
