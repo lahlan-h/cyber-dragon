@@ -1,0 +1,19 @@
+{
+  "name": "@cyber-dragon/pi-sim",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bridge": "BRIDGE_HOST=0.0.0.0 node src/index.js",
+    "probe": "node scripts/probe.js",
+    "docker:build": "docker build -t cyber-dragon-pi ../..",
+    "docker:run": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
+    "docker:info": "docker run --rm -it --add-host=host.docker.internal:host-gateway cyber-dragon-pi stm32flash -m 8n1 /dev/ttyVIRTUAL"
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3"
+  }
+}

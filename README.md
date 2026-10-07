@@ -24,7 +24,7 @@ OpenPLC's toolchain (MatIEC's `iec2c`, then PlatformIO), and the flash around
 ## How it works
 
 ```
-Laptop (TUI)  ──WebSocket over SSH tunnel──▶  Raspberry Pi (server)  ──RS232──▶  PLC
+Laptop (TUI)  -- WebSocket over SSH tunnel --▶  Raspberry Pi (server)  -- RS232 --▶  PLC
 ```
 
 1. **Pick** a `.st` program from your flash folder.
@@ -41,19 +41,21 @@ message is checked on both ends.
 
 An npm-workspaces monorepo, orchestrated by [Turborepo](https://turborepo.dev).
 
-| Workspace | What it is |
-| --- | --- |
-| `packages/tui` | The terminal UI, built with [Ink](https://github.com/vadimdemedes/ink) and React. Runs on your laptop. |
-| `packages/server` | The WebSocket server that runs on the Pi and drives the build and flash. Currently a mock. |
-| `packages/shared` | The message protocol both sides import, as TypeScript types. |
+| Workspace         | What it is                                                                                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `packages/tui`    | The terminal UI, built with [Ink](https://github.com/vadimdemedes/ink) and React. Runs on your laptop. |
+| `packages/server` | The WebSocket server that runs on the Pi and drives the build and flash. Currently a mock.             |
+| `packages/shared` | The message protocol both sides import, as TypeScript types.                                           |
+| `packages/pi-sim` | No Pi? Runs the cyber-dragon stack in Docker, with your laptop's USB-serial cable bridged in.          |
 
-## Getting started
+## Developers!
 
 ### Prerequisites
 
 - **Node.js 26+** and npm 11+, on your laptop and on the Pi
 - For real hardware: a **Raspberry Pi** you can SSH into, a USB-to-RS232 cable and
-  an FX3U-clone PLC. None of this is needed while the server is a mock.
+  an FX3U-clone PLC.
+- Alternatively! Utilise **packages/pi-sim** to simulate the Raspberry Pi stack on your computer.
 
 ### Setup
 
@@ -98,24 +100,25 @@ Don't run the local mock server while the tunnel is open: both need port 3000.
 
 ### Controls
 
-| Key | Does |
-| --- | --- |
-| `↑` `↓` | Move the cursor |
-| `Enter` | Select, or confirm a flash |
-| `→` | Open the highlighted screen |
-| `Esc` `←` | Back to the menu |
-| `c` | Cancel, on the flash checklist |
+| Key       | Does                           |
+| --------- | ------------------------------ |
+| `↑` `↓`   | Move the cursor                |
+| `Enter`   | Select, or confirm a flash     |
+| `→`       | Open the highlighted screen    |
+| `Esc` `←` | Back to the menu               |
+| `c`       | Cancel, on the flash checklist |
 
 Settings is where you reconnect to the Pi and change the theme.
 
-### Type-checking
+## Simulating the Raspberry Pi
 
 ```bash
-npm run typecheck   # type-checks every package
-```
+# terminal 1
+npm run bridge -w @cyber-dragon/pi-sim
 
-`tsx` runs the code without checking types, so run this before you commit. There
-are no automated tests yet.
+# terminal 2
+npm run docker:info -w @cyber-dragon/pi-sim # Test a connection works
+```
 
 ## Roadmap
 
@@ -123,7 +126,3 @@ are no automated tests yet.
 - **Restore:** put the factory firmware back on the board
 - **Home:** show information about the connected PLC
 - Drive BOOT0 and reset from the Pi's GPIO, so flashing needs no hands on the board
-
-## Contributing
-
-Work on the `development` branch. Changes reach `main` through pull requests.
