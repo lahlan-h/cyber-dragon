@@ -15,7 +15,7 @@ WORKDIR /app
 RUN npm ci --workspace @cyber-dragon/server
 
 # Give the script executable permissions
-# RUN chmod +x /app/docker/entrypoint.sh
+RUN chmod +x /app/docker/entrypoint.sh
 
 ENV SERIAL_PORT=/dev/ttyVIRTUAL \
     BRIDGE_HOST=host.docker.internal \
@@ -24,5 +24,5 @@ ENV SERIAL_PORT=/dev/ttyVIRTUAL \
     PORT=3000
 
 # When this container is created run this script before anything else
-#ENTRYPOINT ["/app/docker/entrypoint.sh"]
+ENTRYPOINT ["/app/docker/entrypoint.sh"]
 CMD ["npm", "start", "-w", "@cyber-dragon/server"]
