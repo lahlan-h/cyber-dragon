@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "concurrently -k -n bridge,server \"npm run bridge\" \"npm run server\"",
-    "bridge:old": "BRIDGE_HOST=0.0.0.0 node src/index.js",
-    "bridge": "socat -d -d TCP-LISTEN:5050,reuseaddr,fork /dev/cu.PL2303G-USBtoUART10,raw,echo=0,ispeed=57600,ospeed=57600,cs8,parenb=1,parodd=0,cstopb=0",
+    "start": "concurrently -k -n bridge,server \"npm run bridge:node\" \"npm run server\"",
+    "bridge:node": "BRIDGE_HOST=0.0.0.0 node src/index.js",
+    "bridge:bash": "socat -d -d TCP-LISTEN:5050,reuseaddr,fork /dev/cu.PL2303G-USBtoUART10,raw,echo=0,ispeed=57600,ospeed=57600,cs8,parenb=1,parodd=0,cstopb=0",
     "server": "docker run --rm --init --name cyber-dragon-pi -p 3000:3000 --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
     "stop": "docker stop cyber-dragon-pi",
     "build": "docker build -t cyber-dragon-pi --build-arg CACHEBUST=$(date +%s) ../..",

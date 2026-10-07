@@ -37,31 +37,29 @@ serial.on("error", (err) => {
 // 3. One TCP client at a time; shuttle bytes both ways
 let client = null;
 
+// One permanent listener, attached at startup: serial → whoever is connected
+serial.on("data", (data) => {
+  console.log(ts(), "serial → TCP", data); // DEBUG
+  client?.write(data); // ?. = only if a client is connected
+});
+
 const server = net.createServer({ allowHalfOpen: true }, (socket) => {
   if (client) {
     console.log(ts(), "Rejected extra client (one at a time)");
-    return socket.destroy(); // one board, one user
+    return socket.destroy();
   }
-
   client = socket;
+  console.log(ts(), "Client connected");
 
-  // Core idea of the program: the bridge
-  const toSocket = (data) => socket.write(data);
-  serial.on("data", (data) => socket.write(data));
-  socket.on("data", (data) => serial.write(data));
-
-  // Client finished sending: give the chip 1 s to reply, then close our side too
-  socket.on("end", () => setTimeout(() => socket.end(), 1000));
-
-  socket.on("close", () => {
-    serial.off("data", toSocket); // stop posting to a dead socket
-    client = null;
+  socket.on("data", (data) => {
+    console.log(ts(), "TCP → serial", data); // DEBUG
+    serial.write(data);
   });
 
-  socket.on("error", () => {}); // catch an error and do nothing (to keep the bridge running)
+  socket.on("end", () => setTimeout(() => socket.end(), 1000));
+  socket.on("close", () => {
+    client = null; // nothing to .off() any more
+    console.log(ts(), "Client disconnected");
+  });
+  socket.on("error", () => {});
 });
-
-// Begin the server
-server.listen(tcpPortNumber, HOST, () =>
-  console.log(ts(), `Bridge listening on ${HOST}:${tcpPortNumber}`),
-);
