@@ -46,7 +46,7 @@ ENV SERIAL_PORT=/dev/ttyVIRTUAL \
     PORT=3000 \
     PIO_BIN=/opt/venv/bin/pio \
     PROJECT_DIR=/app/firmware/openplc-uploader \
-    SERIAL_MODE=8e1
+    SERIAL_MODE=8n1
 
 # When this container is created run this script before anything else
 ENTRYPOINT ["/app/docker/entrypoint.sh"]

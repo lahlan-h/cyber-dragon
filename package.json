@@ -1,6 +1,6 @@
 {
   "name": "cyber-dragon",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A Raspberry Pi-based project for interfacing with PLCs and exploring industrial automation.",
   "private": true,
   "author": "lahlan-h",
