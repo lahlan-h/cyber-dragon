@@ -58,6 +58,34 @@ const mockTools: Tools = {
   },
 };
 
+const realTools: Tools = {
+  async build(program, onLog, signal) {
+    if (!program.trim()) {
+      onLog("error: the program is empty");
+      return null;
+    }
+
+    for (const line of FAKE_BUILD_LOG) {
+      await sleep(10);
+      if (signal.aborted) return null;
+      onLog(line);
+    }
+    return { name: "fx3u_24_raw", bytes: 86804 };
+  },
+
+  async flash(onProgress, signal) {
+    await sleep(500);
+    if (Math.random() < MOCK_FLASH_FAIL_RATE) return false;
+
+    for (let percent = 10; percent <= 100; percent += 10) {
+      await sleep(300);
+      if (signal.aborted) return false;
+      onProgress(percent);
+    }
+    return true;
+  },
+};
+
 // One board, one pipeline, every connected client shares it
 class Pipeline {
   private stage: ServerStage = "idle";
