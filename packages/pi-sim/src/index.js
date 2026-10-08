@@ -5,7 +5,7 @@ import { SerialPort } from "serialport";
 
 // 1. Settings for the command line: npm run bridge:node -w @cyber-dragon/pi-sim -- <serial-port> [tcp-port]
 //    e.g. /dev/cu.PL2303G-USBtoUART10 (macOS), /dev/ttyUSB0 (Linux), COM3 (Windows)
-const [portPath = "/dev/cu.PL2303G-USBtoUART10", tcpPort = "5050"] = process.argv.slice(2);
+const [portPath = "/dev/cu.PL2303G-USBtoUART110", tcpPort = "5050"] = process.argv.slice(2);
 
 // Check the TCP port is a valid number
 const tcpPortNumber = Number(tcpPort);
