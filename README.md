@@ -112,12 +112,16 @@ Settings is where you reconnect to the Pi and change the theme.
 
 ## Simulating the Raspberry Pi
 
-```bash
-# terminal 1
-npm run bridge -w @cyber-dragon/pi-sim
+Works on macOS, Linux and Windows. Plug in the USB-serial cable and start Docker first.
 
-# terminal 2
-npm run docker:info -w @cyber-dragon/pi-sim # Test a connection works
+```bash
+npm run build -w @cyber-dragon/pi-sim   # once, and after pushing server changes
+
+# terminal 1: the serial bridge plus the "Pi" container
+npm start -w @cyber-dragon/pi-sim       # more than one USB-serial adapter? add: -- COM3
+
+# terminal 2: with the board in bootloader mode, check it answers
+npm run info -w @cyber-dragon/pi-sim
 ```
 
 ## Roadmap
