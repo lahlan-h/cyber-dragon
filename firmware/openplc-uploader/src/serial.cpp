@@ -140,7 +140,11 @@ static inline void slave_en_pin(int state)
 static inline int slave_tx_complete(void)
 {
 #if ARDUINO_ARCH_STM32
-    return UART_SR_TC(MBSLAVE_IFACE);
+    /* The TC flag alone let the RS-485 driver switch off mid-reply (about 5% of
+     * replies were cut after their first byte). The core only empties its send
+     * queue once the hardware reports the last byte fully sent. */
+    return MBSLAVE_IFACE.availableForWrite() == SERIAL_TX_BUFFER_SIZE - 1 &&
+           UART_SR_TC(MBSLAVE_IFACE);
 #else
     return (!RS485_SLAVE_EN || UART_SLAVE_TX_COMPLETE);
 #endif
