@@ -2,7 +2,9 @@ import { spawn } from "node:child_process";
 import { stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { WebSocketServer, WebSocket } from "ws";
-import type { ClientMessage, ServerMessage } from "@cyber-dragon/shared";
+import type { ClientMessage, PlcState, ServerMessage } from "@cyber-dragon/shared";
+import { PlcMonitor } from "./plc/monitor";
+import { parseProgram, type PlcProgram } from "./plc/st-program";
 
 type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
 
@@ -12,6 +14,8 @@ const SERIAL_PORT = process.env.SERIAL_PORT ?? "/dev/ttyVIRTUAL"; // used by the
 const SERIAL_MODE = process.env.SERIAL_MODE ?? "8e1";
 const PROJECT_DIR = process.env.PROJECT_DIR ?? "/app/firmware/openplc-uploader";
 const PIO_BIN = process.env.PIO_BIN ?? "/opt/venv/bin/pio";
+const MODBUS_PORT = process.env.MODBUS_PORT; // the RS-485 adapter, passed in by plc-host on Linux
+const PLC_ID = process.env.PLC_ID ?? "PLC001";
 
 const PIO_ENV = "fx3u_24_raw";
 const PROGRAM_PATH = path.join(PROJECT_DIR, "plc_prog.st"); // script.py runs iec2c on this
@@ -101,7 +105,8 @@ const realTools: Tools = {
       onProgress(percent);
     };
 
-    const args = ["-m", SERIAL_MODE, "-w", firmware.path, "-v", SERIAL_PORT];
+    // -g: jump straight into the new program, so it runs without flipping BOOT0 and power-cycling
+    const args = ["-m", SERIAL_MODE, "-w", firmware.path, "-v", "-g", "0x08000000", SERIAL_PORT];
     const code = await runCommand("stm32flash", args, PROJECT_DIR, onLine, signal);
     return code === 0;
   },
@@ -112,10 +117,12 @@ class Pipeline {
   private stage: ServerStage = "idle";
   private run = new AbortController();
   private firmware: Firmware | null = null; // The last good build, waiting to be flashed
+  private program: PlcProgram | null = null; // ...and the variables it exposes over Modbus
 
   constructor(
     private tools: Tools,
     private send: (msg: ServerMessage) => void,
+    private monitor: PlcMonitor | null,
   ) {}
 
   upload(filename: string, program: string) {
@@ -141,6 +148,7 @@ class Pipeline {
   }
 
   reset() {
+    if (this.stage === "flashing") this.monitor?.finishFlash(null); // stopped midway: who knows what's on it
     this.run.abort(); // stops the work that is running right now
     this.stage = "idle"; // stops anything new starting
   }
@@ -159,6 +167,15 @@ class Pipeline {
     }
 
     this.firmware = firmware;
+    this.program = parseProgram(program);
+    if (this.monitor) {
+      const names = this.program.variables.map((v) => v.name);
+      onLog(
+        names.length
+          ? `PLC state will report: ${names.join(", ")}`
+          : "PLC state will report no variables - give them an address (e.g. AT %QX1.2) to make them readable",
+      );
+    }
     this.send({
       type: "build_result",
       success: true,
@@ -170,6 +187,7 @@ class Pipeline {
 
   private async flashWithRetries(firmware: Firmware, signal: AbortSignal) {
     this.stage = "flashing";
+    this.monitor?.startFlash();
     const onProgress = (percent: number) => this.send({ type: "flash_progress", percent });
 
     for (let attempt = 1; attempt <= MAX_FLASH_ATTEMPTS; attempt++) {
@@ -182,6 +200,7 @@ class Pipeline {
 
       if (flashed) {
         this.stage = "idle";
+        this.monitor?.finishFlash(this.program);
         return this.send({ type: "flash_result", success: true });
       }
       console.log(`Flash attempt ${attempt}/${MAX_FLASH_ATTEMPTS} failed`);
@@ -192,6 +211,7 @@ class Pipeline {
       stage: "flash",
       message: `Flash failed after ${MAX_FLASH_ATTEMPTS} attempts`,
     });
+    this.monitor?.finishFlash(null);
     this.promptFlash(); // the firmware is still good - no rebuild needed
   }
 
@@ -210,7 +230,18 @@ const broadcast = (msg: ServerMessage) => {
   }
 };
 
-const pipeline = new Pipeline(realTools, broadcast);
+// Phase 2 logs the PLC's state when it changes; Phase 3 will POST every report, heartbeats too
+let lastLogged = "";
+const reportState = (state: PlcState) => {
+  const key = JSON.stringify([state.status, state.program, state.variables]);
+  if (key !== lastLogged) console.log("PLC state:", JSON.stringify(state));
+  lastLogged = key;
+};
+const monitor = MODBUS_PORT ? new PlcMonitor(PLC_ID, MODBUS_PORT, reportState) : null;
+if (monitor) monitor.start();
+else console.log("No MODBUS_PORT set - PLC state reporting is off");
+
+const pipeline = new Pipeline(realTools, broadcast, monitor);
 
 const handle = (msg: ClientMessage) => {
   if (msg.type === "upload") pipeline.upload(msg.filename, msg.content);
