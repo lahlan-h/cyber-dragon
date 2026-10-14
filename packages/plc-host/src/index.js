@@ -4,7 +4,7 @@ import net from "node:net";
 import { parseArgs } from "node:util";
 import { SerialPort } from "serialport";
 
-// 1. Settings for the command line: npm run bridge:node -w @cyber-dragon/pi-sim -- [serial-port] [tcp-port]
+// 1. Settings for the command line: npm run bridge:node -w @cyber-dragon/plc-host -- [serial-port] [tcp-port]
 //    e.g. /dev/cu.PL2303G-USBtoUART10 (macOS), /dev/ttyUSB0 (Linux), COM3 (Windows)
 //    Leave the serial port out to use the only USB serial adapter plugged in
 const { values, positionals } = parseArgs({
@@ -16,7 +16,7 @@ const [portArg, tcpPort = "5050"] = positionals;
 // Check the TCP port is a valid number
 const tcpPortNumber = Number(tcpPort);
 if (!Number.isInteger(tcpPortNumber) || tcpPortNumber < 1 || tcpPortNumber > 65535) {
-  console.error("Usage: npm run bridge:node -w @cyber-dragon/pi-sim -- [serial-port] [tcp-port]");
+  console.error("Usage: npm run bridge:node -w @cyber-dragon/plc-host -- [serial-port] [tcp-port]");
   process.exit(1);
 }
 

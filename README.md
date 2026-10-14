@@ -41,12 +41,12 @@ message is checked on both ends.
 
 An npm-workspaces monorepo, orchestrated by [Turborepo](https://turborepo.dev).
 
-| Workspace         | What it is                                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| `packages/tui`    | The terminal UI, built with [Ink](https://github.com/vadimdemedes/ink) and React. Runs on your laptop. |
-| `packages/server` | The WebSocket server that runs on the Pi and drives the build and flash. Currently a mock.             |
-| `packages/shared` | The message protocol both sides import, as TypeScript types.                                           |
-| `packages/pi-sim` | No Pi? Runs the cyber-dragon stack in Docker, with your laptop's USB-serial cable bridged in.          |
+| Workspace           | What it is                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `packages/tui`      | The terminal UI, built with [Ink](https://github.com/vadimdemedes/ink) and React. Runs on your laptop.        |
+| `packages/server`   | The WebSocket server that runs on the Pi and drives the build and flash. Currently a mock.                    |
+| `packages/shared`   | The message protocol both sides import, as TypeScript types.                                                  |
+| `packages/plc-host` | Runs the server in Docker on whichever machine the PLC is plugged into, with its USB-serial cable bridged in. |
 
 ## Developers!
 
@@ -55,7 +55,7 @@ An npm-workspaces monorepo, orchestrated by [Turborepo](https://turborepo.dev).
 - **Node.js 26+** and npm 11+, on your laptop and on the Pi
 - For real hardware: a **Raspberry Pi** you can SSH into, a USB-to-RS232 cable and
   an FX3U-clone PLC.
-- Alternatively! Utilise **packages/pi-sim** to simulate the Raspberry Pi stack on your computer.
+- Alternatively! Utilise **packages/plc-host** to run the server stack in Docker, on the Pi or your own computer.
 
 ### Setup
 
@@ -110,18 +110,19 @@ Don't run the local mock server while the tunnel is open: both need port 3000.
 
 Settings is where you reconnect to the Pi and change the theme.
 
-## Simulating the Raspberry Pi
+## Running the stack in Docker
 
+`packages/plc-host` runs on whichever machine the PLC is plugged into: a Pi, or your own computer.
 Works on macOS, Linux and Windows. Plug in the USB-serial cable and start Docker first.
 
 ```bash
-npm run build -w @cyber-dragon/pi-sim   # once, and after pushing server changes
+npm run build -w @cyber-dragon/plc-host   # once, and after pushing server changes
 
-# terminal 1: the serial bridge plus the "Pi" container
-npm start -w @cyber-dragon/pi-sim       # more than one USB-serial adapter? add: -- COM3
+# terminal 1: the serial bridge plus the server container
+npm start -w @cyber-dragon/plc-host       # more than one USB-serial adapter? add: -- COM3
 
 # terminal 2: with the board in bootloader mode, check it answers
-npm run info -w @cyber-dragon/pi-sim
+npm run info -w @cyber-dragon/plc-host
 ```
 
 ## Roadmap
