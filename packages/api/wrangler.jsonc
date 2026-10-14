@@ -1,0 +1,25 @@
+// The PLC state API, deployed to Cloudflare Workers. The name is in the public URL
+// (<name>.<account>.workers.dev), so it's student-facing.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "plc-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  // One Durable Object per PLC, holding its latest state
+  "durable_objects": {
+    "bindings": [{ "name": "PLC", "class_name": "PlcStore" }]
+  },
+  "exports": {
+    "PlcStore": { "type": "durable-object", "storage": "sqlite" }
+  },
+
+  // Per client IP, so one runaway loop can't use up the day's request budget. Counted per
+  // Cloudflare location and approximate - a guard rail, not an exact quota
+  "ratelimits": [{ "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 300, "period": 10 } }],
+
+  // STUDENT_KEY, the read-only key handed out each lesson, and PI_KEY, the Pis' write key. Their
+  // values live in the repo's .env; `npm run secrets` uploads them
+  "secrets": { "required": ["STUDENT_KEY", "PI_KEY"] }
+}

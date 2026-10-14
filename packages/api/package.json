@@ -1,0 +1,23 @@
+{
+  "name": "@cyber-dragon/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --env-file ../../.env",
+    "deploy": "node scripts/secrets.js --deploy",
+    "secrets": "node scripts/secrets.js",
+    "types": "wrangler types --include-runtime=false",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@cyber-dragon/shared": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261014.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.151.0"
+  }
+}

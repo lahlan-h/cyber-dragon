@@ -6,7 +6,8 @@
 // flashing: the Pi is writing a new program to it.
 // unknown_program: nothing has been flashed through the Pi since it started, so it doesn't know
 //   the program's variable names yet.
-export type PlcStatus = "online" | "offline" | "flashing" | "unknown_program";
+export const PLC_STATUSES = ["online", "offline", "flashing", "unknown_program"] as const;
+export type PlcStatus = (typeof PLC_STATUSES)[number];
 
 export interface PlcState {
   plc: string; // e.g. "PLC001"
