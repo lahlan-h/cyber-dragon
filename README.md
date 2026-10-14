@@ -119,10 +119,25 @@ Works on macOS, Linux and Windows. Plug in the USB-serial cable and start Docker
 npm run build -w @cyber-dragon/plc-host   # once, and after pushing server changes
 
 # terminal 1: the serial bridge plus the server container
-npm start -w @cyber-dragon/plc-host       # more than one USB-serial adapter? add: -- COM3
+npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0
 
 # terminal 2: with the board in bootloader mode, check it answers
 npm run info -w @cyber-dragon/plc-host
+```
+
+### Which serial port?
+
+Pass the port of the USB-serial cable plugged into the PLC's **DB9 (programming) port**:
+`/dev/ttyUSB0` or similar on Linux, `/dev/cu.…` on macOS (not `/dev/tty.…`, which waits for a
+modem signal and hangs), `COM3` or similar on Windows (Device Manager → Ports).
+
+Knowing which port is which is up to whoever sets the machine up. The numbers come from the
+order the adapters were plugged in, not from the cables, so with two adapters (the DB9 cable and
+the RS-485 one for PLC state) `/dev/ttyUSB0` and `/dev/ttyUSB1` can swap after a reboot or
+re-plug. To check on Linux, list each adapter by name next to its `ttyUSB` number:
+
+```bash
+ls -l /dev/serial/by-id/
 ```
 
 ## Roadmap

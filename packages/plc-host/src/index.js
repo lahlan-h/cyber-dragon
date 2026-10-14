@@ -4,37 +4,27 @@ import net from "node:net";
 import { parseArgs } from "node:util";
 import { SerialPort } from "serialport";
 
-// 1. Settings for the command line: npm run bridge:node -w @cyber-dragon/plc-host -- [serial-port] [tcp-port]
-//    e.g. /dev/cu.PL2303G-USBtoUART10 (macOS), /dev/ttyUSB0 (Linux), COM3 (Windows)
-//    Leave the serial port out to use the only USB serial adapter plugged in
+// 1. Settings for the command line: npm run bridge:node -w @cyber-dragon/plc-host -- <serial-port> [tcp-port]
+//    The serial port is the cable on the PLC's DB9 (programming) port - which one that is, is up
+//    to whoever set the machine up: e.g. /dev/ttyUSB0 (Linux), /dev/cu.PL2303G-USBtoUART10 (macOS,
+//    the cu.* name - tty.* waits for a modem carrier signal), COM3 (Windows)
 const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: { host: { type: "string" } }, // --host 0.0.0.0 lets Docker reach the bridge
 });
-const [portArg, tcpPort = "5050"] = positionals;
+const [portPath, tcpPort = "5050"] = positionals;
 
-// Check the TCP port is a valid number
+// Check a serial port was given and the TCP port is a valid number
 const tcpPortNumber = Number(tcpPort);
-if (!Number.isInteger(tcpPortNumber) || tcpPortNumber < 1 || tcpPortNumber > 65535) {
-  console.error("Usage: npm run bridge:node -w @cyber-dragon/plc-host -- [serial-port] [tcp-port]");
+if (!portPath || !Number.isInteger(tcpPortNumber) || tcpPortNumber < 1 || tcpPortNumber > 65535) {
+  console.error("Usage: npm start -w @cyber-dragon/plc-host -- <serial-port> [tcp-port]");
+  console.error("  e.g. npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0");
   process.exit(1);
 }
 
 const HOST = values.host ?? process.env.BRIDGE_HOST ?? "127.0.0.1"; // 127.0.0.1 = this machine only
 const isMac = process.platform === "darwin";
 const isWindows = process.platform === "win32";
-
-// No port given: pick the one USB serial adapter. macOS lists it as /dev/tty.*, which waits for a
-// modem carrier signal when opened - the /dev/cu.* twin doesn't
-const findPort = async () => {
-  const usb = (await SerialPort.list()).filter((port) => port.vendorId);
-  if (usb.length === 1) return usb[0].path.replace(/^\/dev\/tty\./, "/dev/cu.");
-
-  console.error(usb.length ? "More than one USB serial adapter - pass one:" : "No USB serial adapter found");
-  for (const port of usb) console.error(`  ${port.path}  (${port.manufacturer ?? "unknown"})`);
-  process.exit(1);
-};
-const portPath = portArg ?? (await findPort());
 
 // Timestamps for debugging: ms since the bridge started
 const t0 = Date.now();
