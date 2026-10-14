@@ -119,7 +119,8 @@ Works on macOS, Linux and Windows. Plug in the USB-serial cable and start Docker
 npm run build -w @cyber-dragon/plc-host   # once, and after pushing server changes
 
 # terminal 1: the serial bridge plus the server container
-npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0
+npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0               # flashing only
+npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0 /dev/ttyUSB1  # plus PLC state (Linux only)
 
 # terminal 2: with the board in bootloader mode, check it answers
 npm run info -w @cyber-dragon/plc-host
@@ -127,9 +128,14 @@ npm run info -w @cyber-dragon/plc-host
 
 ### Which serial port?
 
-Pass the port of the USB-serial cable plugged into the PLC's **DB9 (programming) port**:
+The first port is the USB-serial cable plugged into the PLC's **DB9 (programming) port**:
 `/dev/ttyUSB0` or similar on Linux, `/dev/cu.…` on macOS (not `/dev/tty.…`, which waits for a
 modem signal and hangs), `COM3` or similar on Windows (Device Manager → Ports).
+
+The optional second port is the USB-RS485 adapter wired to the PLC's **A+/B− terminals**. The
+server polls the PLC's state through it and logs every change. It's passed straight into the
+container, which only works on Linux: Docker on macOS and Windows can't see USB devices. The
+program's variables need an address to be readable, e.g. `State AT %QW2 : INT;`.
 
 Knowing which port is which is up to whoever sets the machine up. The numbers come from the
 order the adapters were plugged in, not from the cables, so with two adapters (the DB9 cable and

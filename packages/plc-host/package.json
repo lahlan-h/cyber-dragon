@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "concurrently -k -P -n bridge,server --teardown \"docker rm -f cyber-dragon-pi\" \"npm run bridge:node -- {@}\" \"npm run server\" --",
+    "start": "concurrently -k -P -n bridge,server --teardown \"docker rm -f cyber-dragon-pi\" \"npm run bridge:node -- {1}\" \"npm run server -- {2}\" --",
     "bridge:node": "node src/index.js --host 0.0.0.0",
     "bridge:socat": "socat -d -d TCP-LISTEN:5050,reuseaddr,fork /dev/cu.PL2303G-USBtoUART10,raw,echo=0,ispeed=57600,ospeed=57600,cs8,parenb=1,parodd=0,cstopb=0",
-    "server": "docker rm -f cyber-dragon-pi && docker run --rm --init --name cyber-dragon-pi -p 3000:3000 --add-host=host.docker.internal:host-gateway cyber-dragon-pi",
+    "server": "node scripts/server.js",
     "stop": "docker rm -f cyber-dragon-pi",
     "build": "node scripts/build.js",
     "shell": "docker exec -it cyber-dragon-pi bash",
