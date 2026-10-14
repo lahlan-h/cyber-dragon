@@ -9,8 +9,11 @@ const REOPEN_MS = 5000; // between attempts to open a missing or unplugged adapt
 const HEARTBEAT_MS = 5000;
 const OFFLINE_AFTER = 3; // failed polls in a row
 
+// Two states are the same if only their timestamps differ
+export const stateKey = ({ status, program, variables }: Pick<PlcState, "status" | "program" | "variables">) =>
+  JSON.stringify([status, program, variables]);
+
 export class PlcMonitor {
-  private program: PlcProgram | null = null; // what's on the PLC, if it was flashed through us
   private flashing = false;
   private online = false;
   private failures = 0;
@@ -23,6 +26,7 @@ export class PlcMonitor {
     private plc: string,
     private port: string,
     private report: (state: PlcState) => void,
+    private program: PlcProgram | null = null, // what's on the PLC, if it was flashed through us
   ) {}
 
   start() {
@@ -100,7 +104,7 @@ export class PlcMonitor {
     const program = this.program?.name ?? null;
     const variables = status === "online" ? this.variables : {};
 
-    const key = JSON.stringify({ status, program, variables });
+    const key = stateKey({ status, program, variables });
     const now = Date.now();
     if (key === this.lastReported && now - this.lastReportedAt < HEARTBEAT_MS) return;
     this.lastReported = key;

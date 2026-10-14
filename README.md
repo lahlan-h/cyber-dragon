@@ -47,6 +47,7 @@ An npm-workspaces monorepo, orchestrated by [Turborepo](https://turborepo.dev).
 | `packages/server`   | The WebSocket server that runs on the Pi and drives the build and flash. Currently a mock.                    |
 | `packages/shared`   | The message protocol both sides import, as TypeScript types.                                                  |
 | `packages/plc-host` | Runs the server in Docker on whichever machine the PLC is plugged into, with its USB-serial cable bridged in. |
+| `packages/api`      | The cloud API students query for PLC state. A Cloudflare Worker; each Pi POSTs its PLC's state to it.         |
 
 ## Developers!
 
@@ -144,6 +145,110 @@ re-plug. To check on Linux, list each adapter by name next to its `ttyUSB` numbe
 
 ```bash
 ls -l /dev/serial/by-id/
+```
+
+## PLC state in the cloud
+
+With an RS-485 port given, the server polls the PLC and sends its state to the cloud API
+(`packages/api`), where students read it with their own code. It doesn't need the TUI: the Pi
+remembers the last program it flashed, so reporting carries on after a restart.
+
+### Keys and settings
+
+Everything secret or machine-specific lives in one `.env` at the repo root, which git ignores.
+If you're deploying this yourself, start from the template:
+
+```bash
+cp .env.example .env
+```
+
+Then fill it in:
+
+- `STUDENT_KEY` and `PI_KEY`: the API's two keys. `openssl rand -hex 16` makes a good one.
+  Students get `STUDENT_KEY`, which is read-only; replace it each lesson. The Pis use `PI_KEY`
+  to send state.
+- `PLC_ID`: this PLC's name in the API, e.g. `PLC001`.
+- `API_URL`: printed when you deploy the API.
+
+`plc-host` passes the Pi only `PLC_ID`, `API_URL` and `PI_KEY`. Without `API_URL` and `PI_KEY`
+the server still polls the PLC and logs its state, but keeps it on the machine.
+
+### Deploying the API
+
+Cloudflare's local runtime doesn't run on a Raspberry Pi (it needs a 48-bit address space), but
+deploying from one works:
+
+```bash
+npx wrangler login                      # once, in a browser on this machine
+npm run deploy -w @cyber-dragon/api     # needs both keys in .env; prints the API's URL
+```
+
+Fill in both keys before deploying - the deploy uploads them, and Cloudflare won't create the
+Worker without them. Then put the printed URL in `API_URL`. To change a key later, e.g. a new
+`STUDENT_KEY` for a lesson, edit `.env` and run `npm run secrets -w @cyber-dragon/api`.
+`npm test -w @cyber-dragon/api` checks the routes with plain Node.
+
+### Getting PLC state into the API
+
+1. Fill in `.env` (see above) and build the image: `npm run build -w @cyber-dragon/plc-host`.
+   Do the build again after pulling changes - the image copies the code from GitHub.
+2. Wire the USB-RS485 adapter to the PLC's A+/B- terminals and start with both ports (Linux only):
+   `npm start -w @cyber-dragon/plc-host -- /dev/ttyUSB0 /dev/ttyUSB1`.
+3. Flash a program through the TUI. Its variables need an address to be readable, e.g.
+   `State AT %QW2 : INT;`. Flashing starts the program straight away; power-cycle the board
+   (BOOT0 still on bootloader) before each flash.
+
+From then on the PLC's state reaches the API within about a second of changing, even with the
+TUI closed, and after a restart.
+
+### Querying the API
+
+Base URL: `https://plc-api.cyber-dragon-api.workers.dev` (or your own deployment's `API_URL`).
+Every request needs the student key in a header: `Authorization: Bearer <STUDENT_KEY>`.
+
+| Request                        | Returns                                              |
+| ------------------------------ | ---------------------------------------------------- |
+| `GET /PLC001/state`            | The PLC's whole state (below)                        |
+| `GET /PLC001/variables/<name>` | One variable, e.g. `{ "name": "State", "value": 2 }` |
+
+```json
+{
+  "plc": "PLC001",
+  "program": "fx3u_chase",
+  "status": "online",
+  "updatedAt": "2026-10-14T08:44:38.579Z",
+  "variables": { "State": 2, "AnyFault": false, "Conveyor": true }
+}
+```
+
+- `status` says whether the Pi can reach the PLC: `online`, `offline` (also shown once a Pi has
+  been silent for 45 s), `flashing` or `unknown_program`. The program's own states, like
+  `fx3u_chase`'s FAULT/READY/RUNNING, are numbers in `variables`.
+- `variables` only has values while `online`. Variable names ignore case, like Structured Text.
+- Errors come back as `{ "error": "..." }`: `401` wrong or missing key, `404` unknown PLC or
+  variable, `429` too many requests (poll at most once a second), `503` variable asked for while
+  the PLC isn't online.
+
+**Postman:** a new `GET` request to `https://plc-api.cyber-dragon-api.workers.dev/PLC001/state`.
+On the **Authorization** tab pick **Bearer Token** and paste the student key, then **Send**.
+
+**curl:**
+
+```bash
+curl -H "Authorization: Bearer <STUDENT_KEY>" https://plc-api.cyber-dragon-api.workers.dev/PLC001/state
+```
+
+**Python** (`pip install requests`):
+
+```python
+import requests
+
+API = "https://plc-api.cyber-dragon-api.workers.dev"
+KEY = "<STUDENT_KEY>"
+
+state = requests.get(f"{API}/PLC001/state", headers={"Authorization": f"Bearer {KEY}"}).json()
+if state["status"] == "online" and state["variables"]["State"] == 2:
+    print("The conveyor is running")
 ```
 
 ## Roadmap

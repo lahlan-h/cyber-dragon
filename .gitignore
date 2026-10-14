@@ -7,3 +7,5 @@ packages/bridge/scripts
 
 # firmware/openplc-uploader build cache (source + iec2c binaries ARE committed)
 .core_dir/
+# Secrets and per-machine settings (.env.example is the template)
+.env

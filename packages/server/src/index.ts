@@ -1,9 +1,11 @@
 import { spawn } from "node:child_process";
-import { stat, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import { rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { WebSocketServer, WebSocket } from "ws";
 import type { ClientMessage, PlcState, ServerMessage } from "@cyber-dragon/shared";
-import { PlcMonitor } from "./plc/monitor";
+import { CloudReporter } from "./plc/cloud";
+import { PlcMonitor, stateKey } from "./plc/monitor";
 import { parseProgram, type PlcProgram } from "./plc/st-program";
 
 type ServerStage = "idle" | "building" | "awaiting_flash" | "flashing";
@@ -16,10 +18,16 @@ const PROJECT_DIR = process.env.PROJECT_DIR ?? "/app/firmware/openplc-uploader";
 const PIO_BIN = process.env.PIO_BIN ?? "/opt/venv/bin/pio";
 const MODBUS_PORT = process.env.MODBUS_PORT; // the RS-485 adapter, passed in by plc-host on Linux
 const PLC_ID = process.env.PLC_ID ?? "PLC001";
+const STATE_DIR = process.env.STATE_DIR; // plc-host mounts the host's ~/.cyber-dragon here
+const API_URL = process.env.API_URL; // the cloud API (packages/api), e.g. https://plc-api.example.workers.dev
+const PI_KEY = process.env.PI_KEY; // ...and the Pis' key for writing to it
 
 const PIO_ENV = "fx3u_24_raw";
 const PROGRAM_PATH = path.join(PROJECT_DIR, "plc_prog.st"); // script.py runs iec2c on this
 const FIRMWARE_PATH = path.join(PROJECT_DIR, ".pio/build", PIO_ENV, "firmware.bin");
+// The last program flashed through us, so PLC state reporting picks up again after a restart
+// without anyone using the TUI. (Wrong if the PLC is reflashed some other way.)
+const FLASHED_PATH = STATE_DIR ? path.join(STATE_DIR, "flashed.st") : null;
 
 const MAX_FLASH_ATTEMPTS = 4;
 const RETRY_DELAY_MS = 1000;
@@ -112,12 +120,23 @@ const realTools: Tools = {
   },
 };
 
+const rememberFlashed = async (source: string | null) => {
+  if (!FLASHED_PATH) return;
+  try {
+    if (source === null) await rm(FLASHED_PATH, { force: true });
+    else await writeFile(FLASHED_PATH, source, "utf8");
+  } catch (err) {
+    console.error(`Couldn't update ${FLASHED_PATH}: ${(err as Error).message}`);
+  }
+};
+
 // One board, one pipeline, every connected client shares it
 class Pipeline {
   private stage: ServerStage = "idle";
   private run = new AbortController();
   private firmware: Firmware | null = null; // The last good build, waiting to be flashed
-  private program: PlcProgram | null = null; // ...and the variables it exposes over Modbus
+  private source = ""; // ...its program
+  private program: PlcProgram | null = null; // ...and the variables that program exposes over Modbus
 
   constructor(
     private tools: Tools,
@@ -148,7 +167,10 @@ class Pipeline {
   }
 
   reset() {
-    if (this.stage === "flashing") this.monitor?.finishFlash(null); // stopped midway: who knows what's on it
+    if (this.stage === "flashing") {
+      this.monitor?.finishFlash(null); // stopped midway: who knows what's on it
+      rememberFlashed(null);
+    }
     this.run.abort(); // stops the work that is running right now
     this.stage = "idle"; // stops anything new starting
   }
@@ -167,6 +189,7 @@ class Pipeline {
     }
 
     this.firmware = firmware;
+    this.source = program;
     this.program = parseProgram(program);
     if (this.monitor) {
       const names = this.program.variables.map((v) => v.name);
@@ -201,6 +224,7 @@ class Pipeline {
       if (flashed) {
         this.stage = "idle";
         this.monitor?.finishFlash(this.program);
+        rememberFlashed(this.source);
         return this.send({ type: "flash_result", success: true });
       }
       console.log(`Flash attempt ${attempt}/${MAX_FLASH_ATTEMPTS} failed`);
@@ -212,6 +236,7 @@ class Pipeline {
       message: `Flash failed after ${MAX_FLASH_ATTEMPTS} attempts`,
     });
     this.monitor?.finishFlash(null);
+    rememberFlashed(null);
     this.promptFlash(); // the firmware is still good - no rebuild needed
   }
 
@@ -230,14 +255,19 @@ const broadcast = (msg: ServerMessage) => {
   }
 };
 
-// Phase 2 logs the PLC's state when it changes; Phase 3 will POST every report, heartbeats too
+const cloud = API_URL && PI_KEY ? new CloudReporter(`${API_URL.replace(/\/+$/, "")}/${PLC_ID}/state`, PI_KEY) : null;
+if (MODBUS_PORT && !cloud) console.log("No API_URL/PI_KEY in .env - PLC state stays on this machine");
+
+// Logs the PLC's state when it changes, and sends it to the cloud API
 let lastLogged = "";
 const reportState = (state: PlcState) => {
-  const key = JSON.stringify([state.status, state.program, state.variables]);
+  const key = stateKey(state);
   if (key !== lastLogged) console.log("PLC state:", JSON.stringify(state));
   lastLogged = key;
+  cloud?.report(state);
 };
-const monitor = MODBUS_PORT ? new PlcMonitor(PLC_ID, MODBUS_PORT, reportState) : null;
+const flashed = FLASHED_PATH && existsSync(FLASHED_PATH) ? parseProgram(readFileSync(FLASHED_PATH, "utf8")) : null;
+const monitor = MODBUS_PORT ? new PlcMonitor(PLC_ID, MODBUS_PORT, reportState, flashed) : null;
 if (monitor) monitor.start();
 else console.log("No MODBUS_PORT set - PLC state reporting is off");
 
